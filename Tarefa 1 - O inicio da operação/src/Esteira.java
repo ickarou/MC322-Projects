@@ -1,6 +1,6 @@
 /*Esteira.java
 *
-* última modificação: 29/08/2026
+* última modificação: 31/08/2026
 *
 * Material para a disciplina MC322 - Programação orientada a objetos
 *
@@ -14,7 +14,7 @@ public class Esteira {
     private int quantidadeMaxima;
 
     /*Construtor*/
-    public Esteira(String item, boolean emMovimento, int quantidadeMaxima) {
+    public Esteira(int quantidadeMaxima) {
         this.item = null;
         this.emMovimento = false;
         this.quantidadeMaxima = quantidadeMaxima;
@@ -23,31 +23,35 @@ public class Esteira {
     /*Métodos*/
     public void ligar(){
         this.emMovimento = true;
-        System.out.println("Esteira Ligada");
+        System.out.println("Esteira Ligada, afaste-se do equipamento");
     }
 
     public void desligar(){
         this.emMovimento = false;
-        System.out.println("Esteira Desigada");
+        System.out.println("Esteira Desigada, segura para manuseio");
     }
 
-    public void adicionarItem(MateriaPrima mat_adicionada){
+    public void adicionarItem(String idItem, int quantidadeDesejada){
+        // Cláusula de guarda: Esteira desligada[cite: 1]
         if (!this.emMovimento){
-            System.out.println("Erro: A esteira está desligada");
+            System.out.println("Erro: A esteira está desligada, necessário ligar");
             return;
         }
 
+        // Cláusula de guarda: Esteira ocupada[cite: 1]
         if (this.item != null) {
             System.out.println("Erro: A esteira já contém um item (" + this.item + ").");
             return;
         }
 
-        if (quantidadeMaxima < mat_adicionada.getQuantidade()){
-            System.out.println("Erro: Quantidade de matéria excede o limite máximo da esteira");
+        // Cláusula de guarda: Capacidade excedida[cite: 1]
+        if (!verificarCapacidade(quantidadeDesejada)){
+            System.out.println("Erro: Quantidade excede o limite máximo da esteira");
             return;
         }
-            this.item = mat_adicionada.getNome();
-            System.out.println("A matéria prima " + mat_adicionada.getId() + " foi colocada na esteira");
+        
+        this.item = idItem;
+        System.out.println("Item " + idItem + " foi colocado na esteira");
     }
 
     public String removerItem(){
@@ -57,8 +61,8 @@ public class Esteira {
         return itemRemovido;
     }
 
-    public boolean verificarCapacidade(MateriaPrima mat_desejada){
-        return quantidadeMaxima >= mat_desejada.getQuantidade();
+    public boolean verificarCapacidade(int quantidadeDesejada){
+        return quantidadeMaxima >= quantidadeDesejada;
     }
 
 }

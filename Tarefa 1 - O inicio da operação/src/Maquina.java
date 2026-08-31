@@ -31,22 +31,22 @@ public class Maquina {
     
     public boolean processar(MateriaPrima materia_prima, int demanda){
         if (!ligada) {
-            System.out.println("A maquina " + nome + " está desligada");
+            System.out.println("A máquina " + nome + " está desligada, segura para manuseio");
             return false;
         }
 
         if (demanda > capacidadeMaxima){
-            System.out.println("A demanda é maior que a capacidade da máquina"); //@edu vamo revisar depois as mensagens, vale nota por criatividade :(
+            System.out.println("A demanda é maior que a capacidade da máquina, incapaz de processar"); 
             return false;
         }
 
         if (!materia_prima.verificarDisponibilidade(demanda)) {
-            System.out.println("Estoque insuficiente de " + materia_prima.getNome());
+            System.out.println("Estoque insuficiente de " + materia_prima.getNome() + ",inserir mais");
             return false;
         }
 
         materia_prima.consumir(demanda);
-        System.out.println("Processou " + demanda + " de " + materia_prima.getNome());
+        System.out.println("Processou " + demanda + " de " + materia_prima.getNome() + " com sucesso, a máquina está a todo vapor!");
         return true;
     }
 
