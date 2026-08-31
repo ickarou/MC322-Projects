@@ -15,8 +15,10 @@ public class Main {
 
         /* Tela de Introdução */
         System.out.println("\n╔════════════════════════════════════════════════════════════════╗");
-        System.out.println("║       FÁBRICA DE COMPONENTES AUTOMOTIVOS - BOSCH KTS 590       ║");
-        System.out.println("║              Produção e Injeção de Plástico ABS                ║");
+        System.out.println("║            FÁBRICA DE SCANNER AUTOMOTIVO - KTS 590             ║");
+        System.out.println("║                    Injeção de Plástico ABS                     ║");
+        System.out.println("╠════════════════════════════════════════════════════════════════╣");
+        System.out.println("║           DIAGNÓSTICO INTELIGENTE NA PALMA DA SUA MÃO          ║");
         System.out.println("╠════════════════════════════════════════════════════════════════╣");
         System.out.println("║  Operadores Logados: Eduardo Pontes e Icaro Amaral             ║");
         System.out.println("╚════════════════════════════════════════════════════════════════╝\n");
