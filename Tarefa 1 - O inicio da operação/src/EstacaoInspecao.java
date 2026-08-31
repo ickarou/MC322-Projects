@@ -39,10 +39,10 @@ public class EstacaoInspecao {
 
         if (produto != null){
             this.produtosInspecionados++;
-            System.out.println("Item '" + produto + "' inspecionado, pronto para ser embalado e vendido!");
+            System.out.println("Produto " + produto + " inspecionado, pronto para ser embalado e vendido!");
         }
         else {
-            System.out.println("Sem itens para inspecionar");
+            System.out.println("Sem produtos para inspecionar");
         }
     }
 

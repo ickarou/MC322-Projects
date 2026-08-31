@@ -38,17 +38,17 @@ public class Maquina {
         }
 
         if (demanda > capacidadeMaxima){
-            System.out.println("A demanda é maior que a capacidade da máquina, incapaz de processar"); 
+            System.out.println("A demanda é maior que a capacidade da máquina, incapaz de injetar novos produtos"); 
             return false;
         }
 
         if (!materia_prima.verificarDisponibilidade(demanda)) {
-            System.out.println("Estoque insuficiente de " + materia_prima.getNome() + ",inserir mais");
+            System.out.println("Estoque insuficiente de " + materia_prima.getNome() + ",inserir mais no funil de alimentação");
             return false;
         }
 
         materia_prima.consumir(demanda);
-        System.out.println("Processou " + demanda + " de " + materia_prima.getNome() + " com sucesso, a máquina está a todo vapor!");
+        System.out.println("Injetou " + demanda + " de " + materia_prima.getNome() + " com sucesso, a máquina está a todo vapor!");
         return true;
     }
 

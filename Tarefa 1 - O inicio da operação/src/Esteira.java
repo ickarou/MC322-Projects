@@ -28,7 +28,7 @@ public class Esteira {
 
     public void desligar(){
         this.emMovimento = false;
-        System.out.println("Esteira Desigada, segura para manuseio");
+        System.out.println("Esteira Desligada, segura para manuseio");
     }
 
     public void adicionarItem(String idItem, int quantidadeDesejada){
@@ -39,7 +39,7 @@ public class Esteira {
         }
 
         if (this.item != null) {
-            System.out.println("Erro: A esteira já contém um item (" + this.item + ").");
+            System.out.println("Erro: A esteira já contém um produto (" + this.item + ").");
             return;
         }
 
@@ -49,12 +49,12 @@ public class Esteira {
         }
         
         this.item = idItem;
-        System.out.println("Item " + idItem + " foi colocado na esteira");
+        System.out.println("Produto " + idItem + " foi colocado na esteira");
     }
 
     public String removerItem(){
         String itemRemovido = this.item;
-        System.out.println("Item: " + this.item + " removido da esteira");
+        System.out.println("Produto: " + this.item + " removido da esteira");
         this.item = null;
         return itemRemovido;
     }

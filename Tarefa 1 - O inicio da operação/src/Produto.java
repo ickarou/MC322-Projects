@@ -18,13 +18,13 @@ public class Produto {
     public Produto(String id, String nome, int quantidadeMateriaPrimaNecessaria) {
         this.id = id;
         this.nome = nome;
-        this.status = "Aguardando processamento";
+        this.status = "Aguardando injeção";
         this.quantidadeMateriaPrimaNecessaria = quantidadeMateriaPrimaNecessaria;
     }
 
     /*Métodos*/
     public void processar(){
-        this.status = "Processado";
+        this.status = "Injetado!";
     }
 
     public void definirDemandaMateriaPrima(int demanda){
