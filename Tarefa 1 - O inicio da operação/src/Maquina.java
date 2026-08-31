@@ -1,6 +1,6 @@
 /*Maquina.java
 *
-* última modificação: 29/08/2026
+* última modificação: 31/08/2026
 *
 * Material para a disciplina MC322 - Programação orientada a objetos
 *

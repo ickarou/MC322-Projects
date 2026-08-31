@@ -31,7 +31,7 @@ public class EstacaoInspecao {
 
     // A estação recebe apenas o nome do produto a ser inspecionado
     public void inspecionar(String produto){
-        // Cláusula de guarda: Estação desativada[cite: 1]
+
         if (!ativa){
             System.out.println("Erro: Estação está desligada, ligue para inspecionar produtos");
             return;
