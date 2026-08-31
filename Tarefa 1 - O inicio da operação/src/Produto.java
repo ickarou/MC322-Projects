@@ -15,10 +15,10 @@ public class Produto {
     private int quantidadeMateriaPrimaNecessaria;
 
     /*Construtor*/
-    public Produto(String id, String nome, String status, int quantidadeMateriaPrimaNecessaria) {
+    public Produto(String id, String nome, int quantidadeMateriaPrimaNecessaria) {
         this.id = id;
         this.nome = nome;
-        this.status = "Aguardando processametno";
+        this.status = "Aguardando processamento";
         this.quantidadeMateriaPrimaNecessaria = quantidadeMateriaPrimaNecessaria;
     }
 
