@@ -14,12 +14,12 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
 
         /* Tela de Introdução */
-        System.out.println("==================================================================");
-        System.out.println("     FÁBRICA DE COMPONENTES AUTOMOTIVOS - BOSCH KTS 590           ");
-        System.out.println("        Produção e Injeção de Carcaças de Plástico ABS            ");
-        System.out.println("==================================================================");
-        System.out.println(" Desenvolvido por: Eduardo Pontes e Icaro Amaral");
-        System.out.println("==================================================================\n");
+        System.out.println("\n╔════════════════════════════════════════════════════════════════╗");
+        System.out.println("║       FÁBRICA DE COMPONENTES AUTOMOTIVOS - BOSCH KTS 590       ║");
+        System.out.println("║              Produção e Injeção de Plástico ABS                ║");
+        System.out.println("╠════════════════════════════════════════════════════════════════╣");
+        System.out.println("║  Operadores Logados: Eduardo Pontes e Icaro Amaral             ║");
+        System.out.println("╚════════════════════════════════════════════════════════════════╝\n");
 
         /* 1. Matéria Prima */
         MateriaPrima plasticoABS = new MateriaPrima("ABS000", "Plástico ABS", 5000, "g", 200);
@@ -37,35 +37,37 @@ public class Main {
         boolean executando = true;
 
         while (executando) {
-            System.out.println("\n----------------------------------");
-            System.out.println("          MENU PRINCIPAL          ");
-            System.out.println("----------------------------------");
-            System.out.println("1. Iniciar produção");
-            System.out.println("2. Consultar estoque de matéria-prima");
-            System.out.println("3. Adicionar matéria-prima ao estoque");
-            System.out.println("4. Sair");
-            System.out.print("Escolha uma opção numérica: ");
+            System.out.println("\n╔═════════════ PAINEL DE CONTROLE CENTRAL ═════════════╗");
+            System.out.println("║                                                      ║");
+            System.out.println("║  [ 1 ] INICIAR CICLO DE PRODUÇÃO                     ║");
+            System.out.println("║  [ 2 ] CONSULTAR ESTOQUE DE MATÉRIA-PRIMA            ║");
+            System.out.println("║  [ 3 ] REABASTECER MATÉRIA-PRIMA                     ║");
+            System.out.println("║  [ 4 ] DESLIGAR SISTEMA E ENCERRAR TURNO             ║");
+            System.out.println("║                                                      ║");
+            System.out.println("╚══════════════════════════════════════════════════════╝");
+            System.out.print("[SISTEMA] Digite o código da operação: ");
 
-            // // Validação simples para aceitar APENAS entradas numéricas
-            // while (!scanner.hasNextInt()) {
-            //     System.out.println("[ERRO] Entrada inválida! Digite apenas números.");
-            //     System.out.print("Tente novamente: ");
-            //     scanner.next();
-            // }
+            //Validação simples para aceitar APENAS entradas numéricas
+            while (!scanner.hasNextInt()) {
+                System.out.println("[ERRO] Entrada inválida! Digite apenas números.");
+                System.out.print("Tente novamente: ");
+                scanner.next();
+            }
             int opcao = scanner.nextInt();
 
             if (opcao == 1) {
-                System.out.println("\n--- SELEÇÃO DE PRODUTO ---");
-                System.out.println("1. " + prod1.getNome() + " (Demanda: " + prod1.getDemandaMateriaPrima() + " g)");
-                System.out.println("2. " + prod2.getNome() + " (Demanda: " + prod2.getDemandaMateriaPrima() + " g)");
-                System.out.println("3. " + prod3.getNome() + " (Demanda: " + prod3.getDemandaMateriaPrima() + " g)");
-                System.out.print("Selecione o produto: ");
+                System.out.println("\n┌─── SELEÇÃO DE MOLDE PARA INJEÇÃO ────────────────────────┐");
+                System.out.println("│ 1. " + prod1.getNome() + " (Demanda: " + prod1.getDemandaMateriaPrima() + " g)");
+                System.out.println("│ 2. " + prod2.getNome() + " (Demanda: " + prod2.getDemandaMateriaPrima() + " g)");
+                System.out.println("│ 3. " + prod3.getNome() + " (Demanda: " + prod3.getDemandaMateriaPrima() + " g)");
+                System.out.println("└──────────────────────────────────────────────────────────┘");
+                System.out.print("[SISTEMA] Selecione o código do produto: ");
 
-                // while (!scanner.hasNextInt()) {
-                //     System.out.println("[Erro: Digite apenas números.");
-                //     System.out.print("Selecione o produto (1-3): ");
-                //     scanner.next();
-                // }
+                while (!scanner.hasNextInt()) {
+                    System.out.println("[Erro] Digite apenas números.");
+                    System.out.print("Selecione o produto (1-3): ");
+                    scanner.next();
+                }
                 int escolhaProd = scanner.nextInt();
 
                 Produto produtoSelecionado = null;
@@ -128,10 +130,11 @@ public class Main {
                 }
 
             } else if (opcao == 2) {
-                System.out.println("\n--- CONSULTA DE ESTOQUE ---");
-                System.out.println("Matéria-Prima ID: " + plasticoABS.getId());
-                System.out.println("Nome: " + plasticoABS.getNome());
-                System.out.println("Quantidade em estoque: " + plasticoABS.getQuantidade() + " " + plasticoABS.getUnidade());
+                System.out.println("\n┌─── RELATÓRIO DO ALMOXARIFADO ────────────────────────────┐");
+                System.out.println("│ ID Material: " + plasticoABS.getId());
+                System.out.println("│ Descrição:   " + plasticoABS.getNome());
+                System.out.println("│ Disponível:  " + plasticoABS.getQuantidade() + " " + plasticoABS.getUnidade());
+                System.out.println("└──────────────────────────────────────────────────────────┘");
 
             } else if (opcao == 3) {
                 System.out.print("\nInforme a quantidade de " + plasticoABS.getNome() + " a ser adicionada (" + plasticoABS.getUnidade() + "): ");
