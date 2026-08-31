@@ -1,0 +1,12 @@
+Tarefa 1
+Tema: Fábrica de Scanners Automotivos (Linha KTS)
+
+1. Justificativa da escolha do tema
+A gente decidiu montar uma fábrica de scanners automotivos porque é um assunto muito presente na rotina de um dos integrantes que trabalha na Bosch. Como eu (Eduardo) já trabalho na área validando softwares de diagnóstico (focados justamente em equipamentos como o KTS590 e o KTS560), achamos que seria perfeito unir a teoria de Programação Orientada a Objetos com algo do mundo real da indústria. Em vez de criar uma fábrica genérica, preferimos simular o início da montagem física desses aparelhos, que é a injeção das carcaças de plástico. Como estudantes de Engenharia de Controle e Automação, trazer o chão de fábrica de equipamentos de diagnóstico para o código tornou o laboratório muito mais prático e fez todo o sentido para nós. Alem disso, o scanner KTS traz muitas possiblidades de melhorias futuras, trazendo um repertorio enorme de incrementos possíveis.
+
+2. Visão de expansão futura
+Para as próximas tarefas, queremos deixar a linha de produção bem mais inteligente. Quando aprendermos sobre herança na disciplina, a nossa ideia é:
+- Adicionar componentes eletrônicos: A fábrica vai passar a receber placas de circuito impresso e microcontroladores, não apenas plástico.
+- Criar máquinas específicas: Queremos adicionar estações especializadas, como uma só para calibrar a eletrônica e outra para gravar o sistema dentro do scanner. 
+- Inspeção rigorosa: A nossa estação de qualidade vai evoluir bastante. Ela não vai apenas dar um "ok", mas sim rodar testes virtuais no aparelho. Se a peça falhar, a ideia é que o sistema a mande para uma esteira de retrabalho ou que seja descartado.
+- Automação logística: Fazer com que a esteira puxe automaticamente as peças certas do estoque dependendo de qual modelo de scanner o usuário escolheu fabricar no menu.
