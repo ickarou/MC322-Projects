@@ -14,7 +14,7 @@ public class Maquina {
     private int capacidadeMaxima;
 
     /*Construtor*/
-    public Maquina(String nome, boolean ligada, int capacidadeMaxima) {
+    public Maquina(String nome, int capacidadeMaxima) {
         this.nome = nome;
         this.ligada = false;
         this.capacidadeMaxima = capacidadeMaxima;
