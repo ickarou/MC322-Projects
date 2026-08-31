@@ -26,7 +26,7 @@ public class EstacaoInspecao {
 
     public void desativar(){
         this.ativa = false;
-        System.out.println("Estação Desligada!");
+        System.out.println("Estação de Inspeção Desligada!");
     }
 
     // A estação recebe apenas o nome do produto a ser inspecionado

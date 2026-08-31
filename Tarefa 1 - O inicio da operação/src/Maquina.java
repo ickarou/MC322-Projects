@@ -23,10 +23,12 @@ public class Maquina {
     /*Métodos*/
     public void ligar(){
         this.ligada = true;
+        System.out.println("Máquina " + nome + " ligada, afaste-se do equipamento");
     }
 
     public void desligar(){
         this.ligada = false;
+        System.out.println("Máquina " + nome + " desligada, segura para manuseio");
     }
     
     public boolean processar(MateriaPrima materia_prima, int demanda){
