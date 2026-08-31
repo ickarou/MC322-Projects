@@ -1,6 +1,6 @@
 /*EstacaoInspecao.java
 *
-* última modificação: 29/08/2026
+* última modificação: 31/08/2026
 *
 * Material para a disciplina MC322 - Programação orientada a objetos
 *
@@ -20,31 +20,33 @@ public class EstacaoInspecao {
 
     /*Métodos*/
     public void ativar(){
-        ativa = true;
-        System.out.println("Estação Ligada!");
+        this.ativa = true;
+        System.out.println("Estação de Inspeção Ligada!");
     }
 
     public void desativar(){
-        ativa = false;
+        this.ativa = false;
         System.out.println("Estação Desligada!");
     }
 
-    public void inspecionar(Esteira produto_inspecao){
+    // A estação recebe apenas o nome do produto a ser inspecionado
+    public void inspecionar(String produto){
+        // Cláusula de guarda: Estação desativada[cite: 1]
         if (!ativa){
-            System.out.println("Erro: Estação está desligada");
+            System.out.println("Erro: Estação está desligada, ligue para inspecionar produtos");
             return;
         }
 
-        String itemRemovido = produto_inspecao.removerItem();
-
-        if (itemRemovido != null){
+        if (produto != null){
             this.produtosInspecionados++;
-            System.out.println("Item '" + itemRemovido + "' inspecionado");
+            System.out.println("Item '" + produto + "' inspecionado, pronto para ser embalado e vendido!");
         }
-        else System.out.println("Sem itens para inspecionar");
+        else {
+            System.out.println("Sem itens para inspecionar");
+        }
     }
 
-    public int getProdutosInspecionados() {
+    public int getTotalInspecionados() {
         return this.produtosInspecionados;
     }
 }
