@@ -1,6 +1,6 @@
 /* Main.java
  *
- * última modificação: 31/08/2026
+ * última modificação: 02/09/2026
  *
  * Material para a disciplina MC322 - Programação orientada a objetos
  *
@@ -32,8 +32,8 @@ public class Main {
         Produto prod3 = new Produto("CARC_BOT", "Carcaça Inferior KTS590", 250);
 
         /* 3. Criação Equipamentos */
-        Maquina injetora = new Maquina("Injetora de Plástico CNC", 1000);
-        Esteira esteira = new Esteira(600);
+        Maquina injetora = new Maquina("Injetora de Plástico", 1000);
+        Esteira esteira = new Esteira(1000);
         EstacaoInspecao estacaoInspecao = new EstacaoInspecao();
 
         boolean executando = true;
@@ -49,7 +49,7 @@ public class Main {
             System.out.println("╚══════════════════════════════════════════════════════╝");
             System.out.print("[SISTEMA] Digite o código da operação: ");
 
-            //Validação simples para aceitar APENAS entradas numéricas
+            //Validação para aceitar somente entradas numéricas
             while (!scanner.hasNextInt()) {
                 System.out.println("[ERRO] Entrada inválida! Digite apenas números.");
                 System.out.print("Tente novamente: ");
@@ -59,15 +59,15 @@ public class Main {
 
             if (opcao == 1) {
                 System.out.println("\n┌─── SELEÇÃO DE MOLDE PARA INJEÇÃO ────────────────────────┐");
-                System.out.println("│ 1. " + prod1.getNome() + " (Demanda: " + prod1.getDemandaMateriaPrima() + " g)");
-                System.out.println("│ 2. " + prod2.getNome() + " (Demanda: " + prod2.getDemandaMateriaPrima() + " g)");
-                System.out.println("│ 3. " + prod3.getNome() + " (Demanda: " + prod3.getDemandaMateriaPrima() + " g)");
+                System.out.println("│ 1. " + prod1.getNome() + " (Custo: " + prod1.getDemandaMateriaPrima() + " g/unidade)");
+                System.out.println("│ 2. " + prod2.getNome() + " (Custo: " + prod2.getDemandaMateriaPrima() + " g/unidade)");
+                System.out.println("│ 3. " + prod3.getNome() + " (Custo: " + prod3.getDemandaMateriaPrima() + " g/unidade)");
                 System.out.println("└──────────────────────────────────────────────────────────┘");
                 System.out.print("[SISTEMA] Selecione o código do produto: ");
 
                 while (!scanner.hasNextInt()) {
-                    System.out.println("[Erro] Digite apenas números.");
-                    System.out.print("Selecione o produto (1-3): ");
+                    System.out.println("ERRO - Digite apenas números.");
+                    System.out.print("Selecione o produto: ");
                     scanner.next();
                 }
                 int escolhaProd = scanner.nextInt();
@@ -84,45 +84,61 @@ public class Main {
                     continue;
                 }
 
-                System.out.print("Informe a demanda de matéria-prima (" + plasticoABS.getUnidade() + "): ");
-                // while (!scanner.hasNextInt()) {
-                //     System.out.println("[ERRO] Digite apenas números.");
-                //     System.out.print("Informe a demanda: ");
-                //     scanner.next();
-                // }
-                int demanda = scanner.nextInt();
+                System.out.print("Informe a quantidade de unidades a serem produzidas: ");
+                while (!scanner.hasNextInt()) {
+                    System.out.println("ERRO - Digite apenas números.");
+                    System.out.print("Informe a quantidade de unidades: ");
+                    scanner.next();
+                }
+                int unidades = scanner.nextInt();
+                
+                // CÁLCULO DA DEMANDA TOTAL EM GRAMAS
+                int demandaTotalGramas = unidades * produtoSelecionado.getDemandaMateriaPrima();
+                System.out.println("-> Demanda total de matéria-prima necessária: " + demandaTotalGramas + " " + plasticoABS.getUnidade());
 
                 System.out.println("\n>>> INICIANDO LINHA DE PRODUÇÃO <<<");
 
-                // Verificação de estoque
-                if (!plasticoABS.verificarDisponibilidade(demanda)) {
+                // Verificação 1: Estoque de matéria-prima
+                if (!plasticoABS.verificarDisponibilidade(demandaTotalGramas)) {
                     System.out.println("Estoque insuficiente de " + plasticoABS.getNome() + "!");
-                    System.out.println("Disponível: " + plasticoABS.getQuantidade() + " g | Solicitado: " + demanda + " g");
-                } else {
+                    System.out.println("Disponível: " + plasticoABS.getQuantidade() + " g | Solicitado: " + demandaTotalGramas + " g");
+                } 
+                // Verificação 2: Capacidade máxima da esteira (CORREÇÃO AQUI)
+                else if (!esteira.verificarCapacidade(demandaTotalGramas)) {
+                    System.out.println("*ERRO CRUCIAL* A carga total solicitada (" + demandaTotalGramas + "g) excede a capacidade máxima da esteira de transporte (600g).");
+                    System.out.println("Por favor, reduza a quantidade de unidades e tente novamente.");
+                    System.out.println(">>> PRODUÇÃO CANCELADA <<<");
+                } 
+                // se passou nas duas verificações, inicia a produção
+                else {
                     // Ligar Equipamentos
                     esteira.ligar();
                     injetora.ligar();
                     estacaoInspecao.ativar();
 
                     // Transporte da Matéria Prima
-                    esteira.adicionarItem(plasticoABS.getId(), demanda);
+                    esteira.adicionarItem(plasticoABS.getId(), demandaTotalGramas);
                     esteira.removerItem();
 
-                    // Processamento
-                    boolean sucessoProcessamento = injetora.processar(plasticoABS, demanda);
+                    // Processamento na Injetora
+                    boolean sucessoProcessamento = injetora.processar(plasticoABS, demandaTotalGramas);
 
                     if (sucessoProcessamento) {
                         produtoSelecionado.processar();
 
                         // Transporte do Produto Acabado
-                        esteira.adicionarItem(produtoSelecionado.getId(), demanda);
+                        esteira.adicionarItem(produtoSelecionado.getId(), demandaTotalGramas);
                         esteira.removerItem();
 
-                        // Inspeção
-                        estacaoInspecao.inspecionar(produtoSelecionado.getNome());
+                        // Inspeção: Avalia cada unidade individualmente
+                        System.out.println("\n--- Iniciando Inspeção de Qualidade ---");
+                        for (int i = 0; i < unidades; i++) {
+                            estacaoInspecao.inspecionar(produtoSelecionado.getNome() + " (Unidade " + (i + 1) + ")");
+                        }
 
-                        System.out.println("\n[SUCESSO] Produção concluída!");
+                        System.out.println("\n*SUCESSO* Produção concluída!");
                         System.out.println("Estoque restante de " + plasticoABS.getNome() + ": " + plasticoABS.getQuantidade() + " g");
+                        System.out.println("Total de itens inspecionados hoje: " + estacaoInspecao.getTotalInspecionados());
                     }
 
                     // Desligar Equipamentos
@@ -141,7 +157,7 @@ public class Main {
             } else if (opcao == 3) {
                 System.out.print("\nInforme a quantidade de " + plasticoABS.getNome() + " a ser adicionada (" + plasticoABS.getUnidade() + "): ");
                 while (!scanner.hasNextInt()) {
-                    System.out.println("[ERRO] Digite apenas números.");
+                    System.out.println("ERRO - Digite apenas números.");
                     System.out.print("Informe a quantidade: ");
                     scanner.next();
                 }
@@ -149,16 +165,22 @@ public class Main {
                 
                 if (qtdAdicionar > 0) {
                     plasticoABS.adicionarEstoque(qtdAdicionar);
-                    System.out.println("[OK] Estoque atualizado! Novo saldo: " + plasticoABS.getQuantidade() + " g");
+                    if (qtdAdicionar > 1000){
+                        System.out.println("UAU! Isso é realmente bastante coisa! Estoque atualizado! Novo saldo: " + plasticoABS.getQuantidade() + " g");
+                        System.out.println("BOSCH agradece pelo fornecimento!");
+                        continue;
+                    }
+                    System.out.println("Tudo OK - Estoque atualizado! Novo saldo: " + plasticoABS.getQuantidade() + " g");
+                    System.out.println("BOSCH agradece pelo fornecimento");
                 } else {
-                    System.out.println("[ERRO] A quantidade deve ser positiva.");
+                    System.out.println("ERRO - A quantidade deve ser positiva.");
                 }
 
             } else if (opcao == 4) {
                 System.out.println("\nEncerrando o sistema da fábrica. Até logo!");
                 executando = false;
             } else {
-                System.out.println("[ERRO] Opção inválida!");
+                System.out.println("ERRO - Opção inválida!");
             }
         }
 

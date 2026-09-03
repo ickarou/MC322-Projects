@@ -52,11 +52,15 @@ public class Esteira {
         System.out.println("Produto " + idItem + " foi colocado na esteira");
     }
 
-    public String removerItem(){
-        String itemRemovido = this.item;
-        System.out.println("Produto: " + this.item + " removido da esteira");
-        this.item = null;
-        return itemRemovido;
+    public String removerItem() {
+        if (this.item == null) {
+            System.out.println("A esteira está vazia!");
+            return null;
+        }
+    String itemRemovido = this.item;
+    System.out.println("Produto: " + itemRemovido + " removido da esteira.");
+    this.item = null;
+    return itemRemovido;
     }
 
     public boolean verificarCapacidade(int quantidadeDesejada){
