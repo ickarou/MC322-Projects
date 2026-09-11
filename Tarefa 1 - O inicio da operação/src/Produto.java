@@ -1,41 +1,46 @@
-/*Produto.java
+/* Classe Abstrata Produto
 *
-* última modificação: 31/08/2026
+* Tarefa 2
+*
+* última modificação: 10/09/2026
 *
 * Material para a disciplina MC322 - Programação orientada a objetos
 *
 */
 
-public class Produto {
+public abstract class Produto {
     
-    /*Atributos privados */
+    /*Atributos privados*/
     private String id;
     private String nome;
     private String status;
-    private int quantidadeMateriaPrimaNecessaria;
+    private int quantidadeMateriaPrimaPorUnidade;
+    private float qualidade;
+    private float probabilidadeFalhaAcumulada;
+    private static int totalProdutosFabricados = 0; 
 
     /*Construtor*/
-    public Produto(String id, String nome, int quantidadeMateriaPrimaNecessaria) {
+    public Produto(String id, String nome, int quantidadeMateriaPrimaPorUnidade, float qualidade) {
         this.id = id;
         this.nome = nome;
+        this.quantidadeMateriaPrimaPorUnidade = quantidadeMateriaPrimaPorUnidade;
+        this.qualidade = qualidade;
+
         this.status = "Aguardando injeção";
-        this.quantidadeMateriaPrimaNecessaria = quantidadeMateriaPrimaNecessaria;
+        this.probabilidadeFalhaAcumulada = 0.0f;
+
+        totalProdutosFabricados++;
     }
 
-    /*Métodos*/
-    public void processar(){
-        this.status = "Injetado!";
-    }
+    /*Métodos Abstratos*/
+    public abstract void processar();
 
-    public void definirDemandaMateriaPrima(int demanda){
-        this.quantidadeMateriaPrimaNecessaria = demanda;
-    }
+    public abstract int calcularTempoProducao();
 
-    public int getDemandaMateriaPrima(){
-        return quantidadeMateriaPrimaNecessaria;
-    }
+    public abstract String getTipo();
 
-        public String getId(){
+    /*Métodos Concretos*/
+    public String getId(){
         return id;
     } 
 
@@ -45,6 +50,22 @@ public class Produto {
 
     public String getStatus(){
         return status;
+    }
+
+    public void setStatus(String newStatus){
+        this.status = newStatus;
+    }
+
+    public int getQuantidadeMateriaPrimaPorUnidade(){
+        return quantidadeMateriaPrimaPorUnidade;
+    }
+
+    public void aumentarProbabilidadeFalha(float probabilidadeMaquina){
+        this.probabilidadeFalhaAcumulada += probabilidadeMaquina;
+    }
+
+    public float getQualidade(){
+        return qualidade;
     }
 
 }
