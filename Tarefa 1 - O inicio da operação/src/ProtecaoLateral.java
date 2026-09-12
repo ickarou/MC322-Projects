@@ -28,7 +28,7 @@ public class ProtecaoLateral extends Produto {
 
     @Override
     public String getTipo(){
-        return "Baixa Qualidade";
+        return "Proteção Lateral";
     }
 }
 

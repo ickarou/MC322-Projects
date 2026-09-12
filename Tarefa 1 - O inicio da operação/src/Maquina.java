@@ -18,19 +18,19 @@ public abstract class Maquina {
     private int capacidadeMaxima;
     private float probabilidadeFalha;
     private float custoOperacao;
+    private Random random = new Random();
 
     /*Construtor*/
-    public Maquina(String nome, int capacidadeMaxima, float custoOperacao) {
+    public Maquina(String nome, int capacidadeMaxima, float probabilidadeFalha, float custoOperacao) {
         this.nome = nome;
         this.capacidadeMaxima = capacidadeMaxima;
         this.custoOperacao = custoOperacao;
-        
-        this.probabilidadeFalha = 0.0f;
+        this.probabilidadeFalha = probabilidadeFalha;
         this.ligada = false;
     }
 
     /*Métodos Abstratos*/
-    public abstract boolean processar(MateriaPrima materiaPrima, int demanda);
+    public abstract boolean processar(Produto produto);
 
     public abstract String getTipo();
 
@@ -61,17 +61,8 @@ public abstract class Maquina {
         return capacidadeMaxima;
     }
 
-    protected boolean verificarFalha(float probabilidadeAtual){
-        Random random = new Random();
-        
-        float sorteio = random.nextFloat();
-
-        /*Se o número sorteado cair dentro da faixa de falha a máquina vai falhar */
-        if (sorteio < probabilidadeAtual) {
-            return true; // A máquina falhou
-        }
-        
-        return false; // Sem falha
+    protected boolean verificarFalha() {
+        return random.nextFloat() < this.probabilidadeFalha;
     }
     
 }

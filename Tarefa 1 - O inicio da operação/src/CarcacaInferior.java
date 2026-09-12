@@ -28,6 +28,6 @@ public class CarcacaInferior extends Produto {
 
     @Override
     public String getTipo(){
-        return "Qualidade Média";
+        return "Carcaça Inferior";
     }
 }

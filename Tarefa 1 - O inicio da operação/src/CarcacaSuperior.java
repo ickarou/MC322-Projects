@@ -28,6 +28,6 @@ public class CarcacaSuperior extends Produto{
 
     @Override
     public String getTipo(){
-        return "Alta Qualidade - Favor, cuidado no manuseio";
+        return "Carcaça Superior";
     }
 }
