@@ -1,6 +1,8 @@
 /*MateriaPrima.java
 *
-* última modificação: 31/08/2026
+* Tarefa 2
+*
+* última modificação: 12/09/2026
 *
 * Material para a disciplina MC322 - Programação orientada a objetos
 *
@@ -13,15 +15,15 @@ public class MateriaPrima {
     private String nome;
     private int quantidade;
     private String unidade;
-    private int quantidadeMinima;
+    private float custoPorUnidade;
 
     /*Construtor*/
-    public MateriaPrima(String id, String nome, int quantidade, String unidade, int quantidadeMinima) {
+    public MateriaPrima(String id, String nome, int quantidade, String unidade, float custoPorUnidade) {
         this.id = id;
         this.nome = nome;
         this.quantidade = quantidade;
         this.unidade = unidade;
-        this.quantidadeMinima = quantidadeMinima;
+        this.custoPorUnidade = custoPorUnidade;
     }
 
 
@@ -52,5 +54,9 @@ public class MateriaPrima {
 
     public String getUnidade(){
         return unidade;
+    }
+
+    public float getCustoPorUnidade() {
+        return custoPorUnidade;
     }
 }  
