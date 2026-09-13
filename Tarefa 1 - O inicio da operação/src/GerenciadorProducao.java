@@ -51,7 +51,16 @@ public class GerenciadorProducao {
     }
 
     public void comprarMateriaPrima (int materiaAdicionada){
-        this.materiaPrima.adicionarEstoque(materiaAdicionada);
+        float custoCompra = materiaAdicionada * this.materiaPrima.getCustoPorUnidade();
+    
+        if (this.budget >= custoCompra) {
+            this.budget -= custoCompra;
+            this.materiaPrima.adicionarEstoque(materiaAdicionada);
+            System.out.println("Compra realizada com sucesso!");
+        } 
+        else {
+        System.out.println("Erro: Orçamento insuficiente para comprar matéria-prima.");
+        }
     }
 
     public void exibirBudget(){
@@ -68,7 +77,7 @@ public class GerenciadorProducao {
         return custoPorPeca * quantidadePecas; 
     }
 
-public void fabricarDemanda(Produto produtoRequerido, Demanda demandaRequerida){
+    public void fabricarDemanda(Produto produtoRequerido, Demanda demandaRequerida){
        if (demandaRequerida.foiAtendida()){
             System.out.println("Esta demanda já foi atendida!");
             return;
