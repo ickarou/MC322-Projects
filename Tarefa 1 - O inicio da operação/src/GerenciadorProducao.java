@@ -33,6 +33,10 @@ public class GerenciadorProducao {
         this.demandas.add(novaDemanda);
     }
 
+    public void registrarMaquina(Maquina novaMaquina){
+        this.maquinas.add(novaMaquina);
+    }
+
     public void atualizarDemanda(String tipoProduto, int quantidadeExtra) {
         boolean encontrou = false;
 
