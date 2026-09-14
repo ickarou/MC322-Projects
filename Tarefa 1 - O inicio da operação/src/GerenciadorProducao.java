@@ -106,6 +106,10 @@ public class GerenciadorProducao {
         this.budget -= custoTotal; //desconto
         this.materiaPrima.consumir(materiaPrimaNecessaria);
 
+        for (Maquina m : this.maquinas) {
+            m.ligar();
+        }
+
         //Produção
         for (int i = 0; i < totalPecas; i++) {
             Produto peca = null;
@@ -132,6 +136,10 @@ public class GerenciadorProducao {
                 }
                 this.produtosFabricados.add(peca);
             }
+        }
+
+        for (Maquina m : this.maquinas) {
+            m.desligar();
         }
 
         demandaRequerida.atender();
