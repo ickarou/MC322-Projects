@@ -1,2 +1,0 @@
-
-        this.materiaPrima.consumir(materiaPrimaNecessaria);
