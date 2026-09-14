@@ -98,7 +98,7 @@ public class GerenciadorProducao {
        }
 
        //Verificação de quantidade de materia prima disponivel
-        if (this.materiaPrima.getQuantidade() < materiaPrimaNecessaria) {
+        if (!this.materiaPrima.verificarDisponibilidade(materiaPrimaNecessaria)) {
             System.out.println("Erro: Matéria-prima insuficiente.");
             return;
         }
