@@ -18,11 +18,13 @@ public class GerenciadorProducao {
     private ArrayList<Demanda> demandas;
     private ArrayList<Produto> produtosFabricados;
     private ArrayList<Maquina> maquinas;
+    private EstrategiaProducao estrategiaAtual;
 
     /*Construtor*/
-    public GerenciadorProducao(MateriaPrima materiaPrima, float budget){
+    public GerenciadorProducao(MateriaPrima materiaPrima, float budget, EstrategiaProducao estrategiaAtual){
         this.materiaPrima = materiaPrima;
         this.budget = budget;
+        this.estrategiaAtual = estrategiaAtual;
         this.demandas = new ArrayList<>();
         this.produtosFabricados = new ArrayList<>();
         this.maquinas = new ArrayList<>();
@@ -117,7 +119,7 @@ public class GerenciadorProducao {
             String idNovo = produtoRequerido.getId() + "-" + i;
             String tipoReq = produtoRequerido.getTipo();
 
-            // Instancia passando APENAS o ID, como exigido pelos seus construtores
+            // Instancia passando o ID
             switch (tipoReq) {
                 case "Carcaça Superior":
                     peca = new CarcacaSuperior(idNovo);
@@ -153,6 +155,11 @@ public class GerenciadorProducao {
 
         novaDemanda.definirCustoUnitarioEstimado(custoUnitarioEstimado);
         this.demandas.add(novaDemanda);
+    }
+
+    public void setEstrategia (EstrategiaProducao novaEstrategia){
+        this.estrategiaAtual = novaEstrategia;
+        System.out.println("*Estratégia alterada para: " + novaEstrategia.getNomeEstrategia());
     }
 
     public void exibirArmazem() {
