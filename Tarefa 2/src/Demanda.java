@@ -1,8 +1,8 @@
 /*Demanda.java
 *
-* Tarefa 2
+* Tarefa 3
 *
-* última modificação: 12/09/2026
+* última modificação: 23/09/2026
 *
 * Material para a disciplina MC322 - Programação orientada a objetos
 *
@@ -13,13 +13,15 @@ public class Demanda {
     /*Atributos privados*/
     private String tipoProduto;
     private int quantidadeProdutos;
-    private boolean atendida;
+    private StatusDemanda status;
+    private double custoUnitario;
 
     /*Construtor*/
-    public Demanda(String tipoProduto, int quantidadeProdutos){
+    public Demanda(String tipoProduto, int quantidadeProdutos, double custoUnitario){
         this.tipoProduto = tipoProduto;
         this.quantidadeProdutos = quantidadeProdutos;
-        this.atendida = false;
+        this.status = StatusDemanda.PENDENTE;
+        this.custoUnitario = custoUnitario;
     }
 
     /*Métodos*/
@@ -32,9 +34,16 @@ public class Demanda {
         return totalNecessario;
     }
 
-    public void atender(){
-        this.atendida = true;
-        System.out.println("Solicitação atendida! Deixe sua avaliação do sistema ao fim do processo.");
+    public void definirCustoUnitarioEstimado(double custo) {
+        this.custoUnitario = custo;
+    }
+
+    public double calcularCustoTotalEstimado() {
+        return this.custoUnitario * this.quantidadeProdutos;
+    }
+
+    public boolean viavelFinanceiramente(double orcamentoDisponivel) {
+        return calcularCustoTotalEstimado() <= orcamentoDisponivel;
     }
 
     public String getTipoProduto() {
@@ -45,7 +54,15 @@ public class Demanda {
         return quantidadeProdutos;
     }
 
-    public boolean foiAtendida() {
-        return atendida;
+    public StatusDemanda getStatus(){
+        return status;
     }
+
+    public void atender(){
+        if (status == StatusDemanda.CANCELADA){
+            throw new IllegalStateException("Não é possível atender um pedido cancelado");
+        }
+        status = StatusDemanda.CONCLUIDA;
+    }
+    
 }

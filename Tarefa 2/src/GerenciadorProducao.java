@@ -145,6 +145,16 @@ public class GerenciadorProducao {
         demandaRequerida.atender();
     }
 
+    public void registrarDemanda(Demanda novaDemanda, Produto produtoAssociado) {
+        double custoOperacaoUnitario = calcularCustoProducao(1);
+        double custoMateriaPrimaUnitario = produtoAssociado.getQuantidadeMateriaPrimaPorUnidade() * this.materiaPrima.getCustoPorUnidade();
+
+        double custoUnitarioEstimado = custoOperacaoUnitario + custoMateriaPrimaUnitario;
+
+        novaDemanda.definirCustoUnitarioEstimado(custoUnitarioEstimado);
+        this.demandas.add(novaDemanda);
+    }
+
     public void exibirArmazem() {
         if (produtosFabricados.isEmpty()) {
             System.out.println("Armazém vazio");
