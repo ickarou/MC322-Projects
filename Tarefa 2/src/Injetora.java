@@ -22,6 +22,11 @@ public class Injetora extends Maquina {
             return false;
         }
 
+        if (estaQuebrada()) {
+            System.out.println(getNome() + " está quebrada e não pode processar " + produto.getNome());
+            return false;
+        }
+
         produto.processar();
 
         if (verificarFalha()) { 

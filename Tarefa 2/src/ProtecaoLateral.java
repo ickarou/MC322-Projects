@@ -30,5 +30,10 @@ public class ProtecaoLateral extends Produto {
     public String getTipo(){
         return "Proteção Lateral";
     }
+
+    @Override
+    public Produto criarNovaUnidade(String id){
+        return new CarcacaSuperior(id);
+    }
 }
 

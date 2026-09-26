@@ -21,6 +21,11 @@ public class EstacaoTestes extends Maquina {
             return false;
         }
 
+        if (estaQuebrada()) {
+            System.out.println(getNome() + " está quebrada e não pode processar " + produto.getNome());
+            return false;
+        }
+
         //chance de rejeição baseada na qualidade do produto e das falhas acumuladas nas máquinas anteriores
         float chanceRejeicao = (produto.getProbabilidadeFalhaAcumulada() * 0.5f) + (produto.getQualidade() * 0.2f);
         

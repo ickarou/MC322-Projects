@@ -22,6 +22,11 @@ public class BracoEncaixotador extends Maquina{
             return false;
         }
 
+        if (estaQuebrada()) {
+            System.out.println(getNome() + " está quebrada e não pode processar " + produto.getNome());
+            return false;
+        }
+
         if (verificarFalha()) { 
             produto.aumentarProbabilidadeFalha(0.10f); 
             System.out.println("AVISO: Ocorreu um problema nas juntas do " + getNome() + ". Probabilidade de defeito aumentada em " + produto.getNome() + ".");

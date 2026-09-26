@@ -30,4 +30,9 @@ public class CarcacaSuperior extends Produto{
     public String getTipo(){
         return "Carcaça Superior";
     }
+
+    @Override
+    public Produto criarNovaUnidade(String id){
+        return new CarcacaSuperior(id);
+    }
 }

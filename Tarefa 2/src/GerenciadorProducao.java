@@ -39,22 +39,22 @@ public class GerenciadorProducao {
         this.maquinas.add(novaMaquina);
     }
 
-    public void atualizarDemanda(String tipoProduto, int quantidadeExtra) {
-        boolean encontrou = false;
+    // public void atualizarDemanda(String tipoProduto, int quantidadeExtra) {
+    //     boolean encontrou = false;
 
-        for (Demanda d : demandas) {
-            if (d.getTipoProduto().equals(tipoProduto) && !d.foiAtendida()) {
-                d.atualizarQuantidade(quantidadeExtra);
-                System.out.println("Sucesso! Demanda de " + tipoProduto + " atualizada");
-                encontrou = true;
-                break; 
-            }
-        }
+    //     for (Demanda d : demandas) {
+    //         if (d.getTipoProduto().equals(tipoProduto) && !d.foiAtendida()) {
+    //             d.atualizarQuantidade(quantidadeExtra);
+    //             System.out.println("Sucesso! Demanda de " + tipoProduto + " atualizada");
+    //             encontrou = true;
+    //             break; 
+    //         }
+    //     }
     
-        if (!encontrou) {
-            System.out.println("Aviso: Nenhuma demanda pendente encontrada para o produto " + tipoProduto);
-        }
-    }
+    //     if (!encontrou) {
+    //         System.out.println("Aviso: Nenhuma demanda pendente encontrada para o produto " + tipoProduto);
+    //     }
+    // }
 
     public void comprarMateriaPrima (int materiaAdicionada){
         float custoCompra = materiaAdicionada * this.materiaPrima.getCustoPorUnidade();
