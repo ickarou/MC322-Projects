@@ -15,7 +15,7 @@ public class GerenciadorProducao {
     /*Atributos Privados*/
     private MateriaPrima materiaPrima;
     private float budget;
-    private String cenarioAtivo;
+    private Cenario cenarioAtivo;
     private EstrategiaProducao estrategiaAtual;
     private ArrayList<Demanda> demandas;
     private ArrayList<Produto> produtosFabricados;
@@ -24,20 +24,20 @@ public class GerenciadorProducao {
     
 
     /*Construtor*/
-    public GerenciadorProducao(MateriaPrima materiaPrima, float budget, String cenarioAtivo) {
+    public GerenciadorProducao(MateriaPrima materiaPrima, Cenario cenario) {
         this.materiaPrima = materiaPrima;
-        this.budget = budget;
+        this.budget = cenario.getBudgetInicial();
+        this.cenarioAtivo = cenario;
         this.demandas = new ArrayList<>();
         this.produtosFabricados = new ArrayList<>();
         this.maquinas = new ArrayList<>();
         this.catalogoProdutos = new ArrayList<>();
-        this.cenarioAtivo = cenarioAtivo;
     }
 
     /*Consulta de cenario*/
 
     public String getNomeCenarioAtivo() {
-        return cenarioAtivo;
+        return cenarioAtivo.name();
     }
 
     /*Métodos de registro*/
