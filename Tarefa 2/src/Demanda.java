@@ -17,11 +17,11 @@ public class Demanda {
     private double custoUnitario;
 
     /*Construtor*/
-    public Demanda(String tipoProduto, int quantidadeProdutos, double custoUnitario){
+    public Demanda(String tipoProduto, int quantidadeProdutos){
         this.tipoProduto = tipoProduto;
         this.quantidadeProdutos = quantidadeProdutos;
         this.status = StatusDemanda.PENDENTE;
-        this.custoUnitario = custoUnitario;
+        this.custoUnitario = 0.0;
     }
 
     /*Métodos*/
@@ -56,6 +56,21 @@ public class Demanda {
 
     public StatusDemanda getStatus(){
         return status;
+    }
+
+    public void iniciarProducao(){
+        if (status != StatusDemanda.PENDENTE){
+            throw new IllegalStateException("Só é possível iniciar produção de uma demanda PENDENTE");
+        }
+        this.status = StatusDemanda.EM_PRODUCAO;
+    }
+
+    public void cancelar(String motivo){
+        if (status == StatusDemanda.CONCLUIDA){
+            throw new IllegalStateException("Não é possível cancelar uma demanda já concluída");
+        }
+        this.status = StatusDemanda.CANCELADA;
+        System.out.println("Demanda de " + tipoProduto + " cancelada. Motivo: " + motivo);
     }
 
     public void atender(){

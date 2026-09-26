@@ -1,6 +1,6 @@
 import java.util.List;
 
-public class EstrategiaFila implements EstrategiaProducao {
+public class EstrategiaLinhaDeMontagem implements EstrategiaProducao {
     
     @Override
     public Demanda selecionarDemanda(List<Demanda> demandas, double orcamentoDisponivel) {
@@ -15,6 +15,6 @@ public class EstrategiaFila implements EstrategiaProducao {
 
     @Override 
     public String getNomeEstrategia(){
-        return "Estratégia: Ordem de chegada";
+        return "Estratégia Linha de Montagem: Prioriza a ordem de chegada";
     }
 }

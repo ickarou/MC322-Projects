@@ -82,7 +82,7 @@ public abstract class Produto implements Auditavel{
     //Implementação da interface Auditavel
     @Override 
     public String gerarRelatorioDiagnostico(){
-        return "O produto " + this.nome + " de qualidade: " + this.qualidade + " está em " + this.probabilidadeFalhaAcumulada + "% de falhar";
+        return "O produto " + this.nome + " de qualidade: " + this.qualidade + " está em " + (this.probabilidadeFalhaAcumulada * 100) + "% de falhar";
     }
 
     @Override 

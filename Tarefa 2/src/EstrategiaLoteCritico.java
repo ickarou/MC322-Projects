@@ -1,6 +1,6 @@
 import java.util.List;
 
-public class EstrategiaMaisPedido implements EstrategiaProducao{
+public class EstrategiaLoteCritico implements EstrategiaProducao{
     
     @Override
     public Demanda selecionarDemanda(List<Demanda> demandas, double orcamentoDisponivel) {
@@ -8,7 +8,7 @@ public class EstrategiaMaisPedido implements EstrategiaProducao{
         List<Demanda> elegiveis = filtro(demandas);
 
         for (Demanda d : elegiveis) {
-            if (d.getQuantidadeProdutos() > maiorDemandaEncontrada.getQuantidadeProdutos()) {
+            if (maiorDemandaEncontrada == null || d.getQuantidadeProdutos() > maiorDemandaEncontrada.getQuantidadeProdutos()) {
                 maiorDemandaEncontrada = d;
             }
         }
@@ -18,6 +18,6 @@ public class EstrategiaMaisPedido implements EstrategiaProducao{
 
     @Override 
     public String getNomeEstrategia(){
-        return "Estratégia: Prioriza os itens de maior demanda";
+        return "Estratégia Lote Crítico: Prioriza os itens de maior demanda pendente";
     }
 }

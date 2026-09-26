@@ -1,8 +1,8 @@
 /*Subclasse Carcaça Inferior
 *
-* Tarefa 2
+* Tarefa 3
 *
-* última modificação: 10/09/2026
+* última modificação: 24/09/2026
 *
 * Material para a disciplina MC322 - Programação orientada a objetos
 *

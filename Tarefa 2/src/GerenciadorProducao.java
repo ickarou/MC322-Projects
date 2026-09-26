@@ -1,107 +1,109 @@
 /* Classe Gerenciador de Produção
 *
-* Tarefa 2
+* Tarefa 3
 *
-* última modificação: 13/09/2026
+* última modificação: 26/09/2026
 *
 * Material para a disciplina MC322 - Programação orientada a objetos
 *
 */
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class GerenciadorProducao {
-    
+
     /*Atributos Privados*/
     private MateriaPrima materiaPrima;
     private float budget;
+    private String cenarioAtivo;
+    private EstrategiaProducao estrategiaAtual;
     private ArrayList<Demanda> demandas;
     private ArrayList<Produto> produtosFabricados;
     private ArrayList<Maquina> maquinas;
-    private EstrategiaProducao estrategiaAtual;
+    private ArrayList<Produto> catalogoProdutos;
+    
 
     /*Construtor*/
-    public GerenciadorProducao(MateriaPrima materiaPrima, float budget, EstrategiaProducao estrategiaAtual){
+    public GerenciadorProducao(MateriaPrima materiaPrima, float budget, String cenarioAtivo) {
         this.materiaPrima = materiaPrima;
         this.budget = budget;
-        this.estrategiaAtual = estrategiaAtual;
         this.demandas = new ArrayList<>();
         this.produtosFabricados = new ArrayList<>();
         this.maquinas = new ArrayList<>();
+        this.catalogoProdutos = new ArrayList<>();
+        this.cenarioAtivo = cenarioAtivo;
     }
 
-    /*Métodos*/
-    public void registrarDemanda(Demanda novaDemanda){
-        this.demandas.add(novaDemanda);
+    /*Consulta de cenario*/
+
+    public String getNomeCenarioAtivo() {
+        return cenarioAtivo;
     }
 
-    public void registrarMaquina(Maquina novaMaquina){
+    /*Métodos de registro*/
+
+    public void registrarMaquina(Maquina novaMaquina) {
         this.maquinas.add(novaMaquina);
     }
 
-    // public void atualizarDemanda(String tipoProduto, int quantidadeExtra) {
-    //     boolean encontrou = false;
+    public void registrarProduto(Produto produto) {
+        this.catalogoProdutos.add(produto);
+    }
 
-    //     for (Demanda d : demandas) {
-    //         if (d.getTipoProduto().equals(tipoProduto) && !d.foiAtendida()) {
-    //             d.atualizarQuantidade(quantidadeExtra);
-    //             System.out.println("Sucesso! Demanda de " + tipoProduto + " atualizada");
-    //             encontrou = true;
-    //             break; 
-    //         }
-    //     }
-    
-    //     if (!encontrou) {
-    //         System.out.println("Aviso: Nenhuma demanda pendente encontrada para o produto " + tipoProduto);
-    //     }
-    // }
-
-    public void comprarMateriaPrima (int materiaAdicionada){
-        float custoCompra = materiaAdicionada * this.materiaPrima.getCustoPorUnidade();
-    
-        if (this.budget >= custoCompra) {
-            this.budget -= custoCompra;
-            this.materiaPrima.adicionarEstoque(materiaAdicionada);
-            System.out.println("Compra realizada com sucesso!");
-        } 
-        else {
-        System.out.println("Erro: Orçamento insuficiente para comprar matéria-prima.");
+    private Produto buscarProdutoPorTipo(String tipo) {
+        for (Produto p : catalogoProdutos) {
+            if (p.getTipo().equals(tipo)) {
+                return p;
+            }
         }
+        return null;
     }
 
-    public void exibirBudget(){
-        System.out.println("O budget atual é: R$" + budget);
+    public void registrarDemanda(Demanda novaDemanda, Produto produtoAssociado) {
+        double custoOperacaoUnitario = calcularCustoProducao(1);
+        double custoMateriaPrimaUnitario = produtoAssociado.getQuantidadeMateriaPrimaPorUnidade() * this.materiaPrima.getCustoPorUnidade();
+
+        novaDemanda.definirCustoUnitarioEstimado(custoOperacaoUnitario + custoMateriaPrimaUnitario);
+        this.demandas.add(novaDemanda);
     }
 
-    private float calcularCustoProducao(int quantidadePecas) {
-        float custoPorPeca = 0.0f; 
+    /*Metódos da estrategia*/
 
-        for (Maquina m : maquinas) {
-            custoPorPeca += m.getCustoOperacao();
+    public void setEstrategia(EstrategiaProducao novaEstrategia) {
+        this.estrategiaAtual = novaEstrategia;
+        System.out.println("Estratégia de produção alterada para: " + novaEstrategia.getNomeEstrategia());
+    }
+
+    public String getNomeEstrategiaAtual() {
+        return (estrategiaAtual != null) ? estrategiaAtual.getNomeEstrategia() : "Nenhuma estratégia definida";
+    }
+
+    /*Métodos de produção e de demanda*/
+
+    public void fabricarDemanda(Produto produtoRequerido, Demanda demandaRequerida) {
+        if (demandaRequerida.getStatus() != StatusDemanda.PENDENTE) {
+            System.out.println("Esta demanda não está mais pendente (status atual: " + demandaRequerida.getStatus() + ")");
+            return;
         }
 
-        return custoPorPeca * quantidadePecas; 
-    }
+        int totalPecas = demandaRequerida.getQuantidadeProdutos();
+        int materiaPrimaNecessaria = demandaRequerida.calcularMateriaPrimaNecessaria(produtoRequerido);
+        float custoTotal = calcularCustoProducao(totalPecas);
 
-    public void fabricarDemanda(Produto produtoRequerido, Demanda demandaRequerida){
-       if (demandaRequerida.foiAtendida()){
-            System.out.println("Esta demanda já foi atendida!");
+        demandaRequerida.iniciarProducao();
+
+        //Verificação de custo
+        if (!demandaRequerida.viavelFinanceiramente(this.budget)) {
+            System.out.println("Erro: Orçamento insuficiente para cobrir o custo de produção (R$ " + custoTotal + ")");
+            demandaRequerida.cancelar("Orçamento insuficiente");
             return;
-       }
+        }
 
-       int totalPecas = demandaRequerida.getQuantidadeProdutos();
-       int materiaPrimaNecessaria = demandaRequerida.calcularMateriaPrimaNecessaria(produtoRequerido);
-       float custoTotal = calcularCustoProducao(totalPecas);
-       
-       //Verificação de custo
-       if (this.budget < custoTotal) {
-            System.out.println("Erro: Orçamento insuficiente para cobrir o custo de produção (R$ " + custoTotal + ").");
-            return;
-       }
-
-       //Verificação de quantidade de materia prima disponivel
+        //Verificação de quantidade de matéria-prima disponível
         if (!this.materiaPrima.verificarDisponibilidade(materiaPrimaNecessaria)) {
-            System.out.println("Erro: Matéria-prima insuficiente.");
+            System.out.println("Erro: Matéria-prima insuficiente");
+            demandaRequerida.cancelar("Matéria-prima insuficiente");
             return;
         }
 
@@ -114,30 +116,14 @@ public class GerenciadorProducao {
 
         //Produção
         for (int i = 0; i < totalPecas; i++) {
-            Produto peca = null;
-
             String idNovo = produtoRequerido.getId() + "-" + i;
-            String tipoReq = produtoRequerido.getTipo();
+            Produto peca = produtoRequerido.criarNovaUnidade(idNovo);
 
-            // Instancia passando o ID
-            switch (tipoReq) {
-                case "Carcaça Superior":
-                    peca = new CarcacaSuperior(idNovo);
-                    break;
-                case "Carcaça Inferior":
-                    peca = new CarcacaInferior(idNovo);
-                    break;
-                case "Proteção Lateral":
-                    peca = new ProtecaoLateral(idNovo);
-                    break;
+            for (Maquina m : this.maquinas) {
+                m.processar(peca);
+                m.aplicarDesgaste();
             }
-            
-            if (peca != null) {
-                for (Maquina m : this.maquinas) {
-                    m.processar(peca);
-                }
-                this.produtosFabricados.add(peca);
-            }
+            this.produtosFabricados.add(peca);
         }
 
         for (Maquina m : this.maquinas) {
@@ -147,31 +133,105 @@ public class GerenciadorProducao {
         demandaRequerida.atender();
     }
 
-    public void registrarDemanda(Demanda novaDemanda, Produto produtoAssociado) {
-        double custoOperacaoUnitario = calcularCustoProducao(1);
-        double custoMateriaPrimaUnitario = produtoAssociado.getQuantidadeMateriaPrimaPorUnidade() * this.materiaPrima.getCustoPorUnidade();
-
-        double custoUnitarioEstimado = custoOperacaoUnitario + custoMateriaPrimaUnitario;
-
-        novaDemanda.definirCustoUnitarioEstimado(custoUnitarioEstimado);
-        this.demandas.add(novaDemanda);
-    }
-
-    public void setEstrategia (EstrategiaProducao novaEstrategia){
-        this.estrategiaAtual = novaEstrategia;
-        System.out.println("*Estratégia alterada para: " + novaEstrategia.getNomeEstrategia());
-    }
-
-    public void exibirArmazem() {
-        if (produtosFabricados.isEmpty()) {
-            System.out.println("Armazém vazio");
+    public void executarProximaProducao() {
+        if (estrategiaAtual == null) {
+            System.out.println("Erro: Nenhuma estratégia de produção foi definida.");
             return;
         }
 
-        System.out.print("Itens no armazém: ");
-        for (Produto p : produtosFabricados) {
-            System.out.printf("%s, ", p.getNome());
+        Demanda escolhida = estrategiaAtual.selecionarDemanda(this.demandas, this.budget);
+
+        if (escolhida == null) {
+            System.out.println("Nenhuma demanda elegível para produção no momento");
+            return;
         }
-        System.out.println(); 
+
+        Produto produto = buscarProdutoPorTipo(escolhida.getTipoProduto());
+        if (produto == null) {
+            System.out.println("Erro: nenhum produto cadastrado para o tipo '" + escolhida.getTipoProduto());
+            return;
+        }
+
+        fabricarDemanda(produto, escolhida);
+    }
+
+    public void atualizarDemanda(String tipoProduto, int quantidadeExtra) {
+        boolean encontrou = false;
+
+        for (Demanda d : demandas) {
+            if (d.getTipoProduto().equals(tipoProduto) && d.getStatus() == StatusDemanda.PENDENTE) {
+                d.atualizarQuantidade(quantidadeExtra);
+                System.out.println("Sucesso! Demanda de " + tipoProduto + " atualizada.");
+                encontrou = true;
+                break;
+            }
+        }
+
+        if (!encontrou) {
+            System.out.println("Aviso: Nenhuma demanda PENDENTE encontrada para o produto " + tipoProduto);
+        }
+    }
+
+    /*Métodos financeiros*/
+
+    public void comprarMateriaPrima(int materiaAdicionada) {
+        float custoCompra = materiaAdicionada * this.materiaPrima.getCustoPorUnidade();
+
+        if (this.budget >= custoCompra) {
+            this.budget -= custoCompra; //desconto
+            this.materiaPrima.adicionarEstoque(materiaAdicionada);
+            System.out.println("Compra realizada com sucesso!");
+        } 
+        else {
+            System.out.println("Erro: Orçamento insuficiente para comprar matéria-prima");
+        }
+    }
+
+    public void exibirBudget() {
+        System.out.println("O budget atual é: R$" + budget);
+    }
+
+    private float calcularCustoProducao(int quantidadePecas) {
+        float custoPorPeca = 0.0f;
+
+        for (Maquina m : maquinas) {
+            custoPorPeca += m.getCustoOperacao();
+        }
+
+        return custoPorPeca * quantidadePecas;
+    }
+
+    /*Consultas + relatórios*/
+
+    public void exibirArmazem() {
+        if (produtosFabricados.isEmpty()) {
+            System.out.println("Armazém vazio.");
+            return;
+        }
+
+        System.out.println("--- ARMAZÉM DE PRODUTOS ACABADOS ---");
+        for (Produto p : produtosFabricados) {
+            String alerta = p.precisaManutencao() ? " [RISCO ALTO]" : "";
+            System.out.printf(
+                    "Lote: %-15s | Tipo: %-20s | Qualidade: %.2f%s%n",
+                    p.getId(), p.getTipo(), p.getQualidade(), alerta
+            );
+        }
+    }
+
+    public void gerarAuditoriaGeral() {
+        System.out.println("========== RELATÓRIO DE AUDITORIA ==========");
+
+        System.out.println("-- Máquinas --");
+        for (Maquina m : maquinas) {
+            System.out.println(m.gerarRelatorioDiagnostico());
+        }
+
+        System.out.println("-- Produtos em armazém --");
+        for (Produto p : produtosFabricados) {
+            System.out.println(p.gerarRelatorioDiagnostico());
+        }
+
+        System.out.println("=============================================");
     }
 }
