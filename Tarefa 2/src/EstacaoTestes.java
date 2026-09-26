@@ -10,8 +10,8 @@
 
 public class EstacaoTestes extends Maquina {
     
-    public EstacaoTestes(String nome) {
-        super(nome, 1000, 0.05f, 200.00f);
+    public EstacaoTestes(String nome, Cenario cenario) {
+        super(nome, 1000, 0.05f, 200.00f, cenario);
     }
 
     @Override 

@@ -22,12 +22,17 @@ public abstract class Maquina implements Auditavel {
 
     protected int saude = 100;
 
+    protected float fatorFalha;
+    private float fatorDesgaste;
+
     //Construtor
-    public Maquina(String nome, int capacidadeMaxima, float probabilidadeFalha, float custoOperacao) {
+    public Maquina(String nome, int capacidadeMaxima, float probabilidadeFalhaBase, float custoOperacao, Cenario cenario) {
         this.nome = nome;
         this.capacidadeMaxima = capacidadeMaxima;
         this.custoOperacao = custoOperacao;
-        this.probabilidadeFalha = probabilidadeFalha;
+        this.fatorFalha = cenario.getFatorFalha();
+        this.fatorDesgaste = cenario.getFatorDesgaste();
+        this.probabilidadeFalha = probabilidadeFalhaBase * this.fatorFalha;
         this.ligada = false;
     }
 
@@ -62,8 +67,9 @@ public abstract class Maquina implements Auditavel {
     }
 
     public void aplicarDesgaste(){
-        int desgaste = random.nextInt(4);
-        this.saude = Math.max(0, this.saude - desgaste); //limite inferior de 0, se a subtração for menor que zero a saude zera
+        int desgasteBase = random.nextInt(4);
+        int desgasteReal = Math.round(desgasteBase * this.fatorDesgaste);
+        this.saude = Math.max(0, this.saude - desgasteReal); //limite inferior de 0
     }
 
     public boolean estaQuebrada(){

@@ -10,8 +10,8 @@
 
 public class Injetora extends Maquina {
     
-    public Injetora(String nome) {
-        super(nome, 5000, 0.15f, 500.00f);
+    public Injetora(String nome, Cenario cenario) {
+        super(nome, 5000, 0.15f, 500.00f, cenario);
     }
 
     /*Métodos da classe principal*/
@@ -29,13 +29,13 @@ public class Injetora extends Maquina {
 
         produto.processar();
 
-        if (verificarFalha()) { 
-            produto.aumentarProbabilidadeFalha(0.05f); 
-            System.out.println("AVISO: Ocorreu uma variação térmica no bico de injeção da " + getNome() + ". Probabilidade de defeito aumentada em " + produto.getNome() + ".");
+        if (verificarFalha()) {
+            produto.aumentarProbabilidadeFalha(0.05f * this.fatorFalha);
+            System.out.println("AVISO: Ocorreu uma variação térmica no bico de injeção da " + getNome() + ". Probabilidade de defeito aumentada em " + produto.getNome());
         } else {
             System.out.println("Injeção de " + produto.getNome() + " realizada!");
         }
-
+ 
         produto.setStatus("Injetado com Sucesso");
         return true;
     }

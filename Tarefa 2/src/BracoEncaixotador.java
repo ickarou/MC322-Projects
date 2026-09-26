@@ -10,8 +10,8 @@
 
 public class BracoEncaixotador extends Maquina{
     
-    public BracoEncaixotador(String nome){
-        super(nome, 1000, 0.10f, 100.00f);
+    public BracoEncaixotador(String nome, Cenario cenario){
+        super(nome, 1000, 0.10f, 100.00f, cenario);
     }
 
     /*Métodos da classe principal*/
