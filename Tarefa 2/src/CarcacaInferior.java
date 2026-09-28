@@ -1,12 +1,12 @@
-/*Subclasse Carcaça Inferior
-*
-* Tarefa 3
-*
-* última modificação: 24/09/2026
-*
-* Material para a disciplina MC322 - Programação orientada a objetos
-*
-*/
+/* Subclasse Carcaça Inferior
+ *
+ * Tarefa 3
+ *
+ * última modificação: 24/09/2026
+ *
+ * Material para a disciplina MC322 - Programação orientada a objetos
+ *
+ */
 
 public class CarcacaInferior extends Produto {
     
@@ -14,7 +14,7 @@ public class CarcacaInferior extends Produto {
         super(id, "Carcaça Inferior KTS590", 200, 0.7f);
     }
 
-    /*Métodos da classe principal*/
+    /* Métodos da classe principal */
     @Override
     public void processar() {
         System.out.println("Injetando " + getNome() + "!");
@@ -33,6 +33,7 @@ public class CarcacaInferior extends Produto {
 
     @Override
     public Produto criarNovaUnidade(String id){
-        return new CarcacaSuperior(id);
+        // Corrigido para instanciar a classe certa
+        return new CarcacaInferior(id);
     }
 }

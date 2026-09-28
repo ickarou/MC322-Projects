@@ -1,12 +1,12 @@
-/*Subclasse Proteção Lateral
-*
-* Tarefa 2
-*
-* última modificação: 10/09/2026
-*
-* Material para a disciplina MC322 - Programação orientada a objetos
-*
-*/
+/* Subclasse Proteção Lateral
+ *
+ * Tarefa 3
+ *
+ * última modificação: 28/09/2026
+ *
+ * Material para a disciplina MC322 - Programação orientada a objetos
+ *
+ */
 
 public class ProtecaoLateral extends Produto {
     
@@ -14,7 +14,7 @@ public class ProtecaoLateral extends Produto {
         super(id, "Proteção Lateral KTS590", 150, 0.5f);
     }
 
-    /*Métodos da classe principal*/
+    /* Métodos da classe principal */
     @Override
     public void processar() {
         System.out.println("Injetando " + getNome() + "!");
@@ -33,7 +33,7 @@ public class ProtecaoLateral extends Produto {
 
     @Override
     public Produto criarNovaUnidade(String id){
-        return new CarcacaSuperior(id);
+        // Corrigido para instanciar a classe certa
+        return new ProtecaoLateral(id);
     }
 }
-

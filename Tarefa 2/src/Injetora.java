@@ -1,12 +1,10 @@
 /* Subclasse Injetora (Classe Máquina)
-*
-* Tarefa 2
-*
-* última modificação: 12/09/2026
-*
-* Material para a disciplina MC322 - Programação orientada a objetos
-*
-*/
+ *
+ * Tarefa 3
+ *
+ * Material para a disciplina MC322 - Programação orientada a objetos
+ *
+ */
 
 public class Injetora extends Maquina {
     
@@ -14,7 +12,7 @@ public class Injetora extends Maquina {
         super(nome, 5000, 0.15f, 500.00f, cenario);
     }
 
-    /*Métodos da classe principal*/
+    /* Métodos da classe principal */
     @Override 
     public boolean processar(Produto produto) {
         if (!estaLigada()) {
@@ -37,6 +35,10 @@ public class Injetora extends Maquina {
         }
  
         produto.setStatus("Injetado com Sucesso");
+        
+        // Aplica o desgaste natural da máquina após terminar o serviço
+        aplicarDesgaste();
+        
         return true;
     }
 

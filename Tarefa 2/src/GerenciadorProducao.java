@@ -1,18 +1,18 @@
 /* Classe Gerenciador de Produção
-*
-* Tarefa 3
-*
-* última modificação: 26/09/2026
-*
-* Material para a disciplina MC322 - Programação orientada a objetos
-*
-*/
+ *
+ * Tarefa 3
+ *
+ * última modificação: 28/09/2026
+ *
+ * Material para a disciplina MC322 - Programação orientada a objetos
+ *
+ */
 
 import java.util.ArrayList;
 
 public class GerenciadorProducao {
 
-    /*Atributos Privados*/
+    /* Atributos Privados */
     private MateriaPrima materiaPrima;
     private float budget;
     private Cenario cenarioAtivo;
@@ -22,8 +22,7 @@ public class GerenciadorProducao {
     private ArrayList<Maquina> maquinas;
     private ArrayList<Produto> catalogoProdutos;
     
-
-    /*Construtor*/
+    /* Construtor */
     public GerenciadorProducao(MateriaPrima materiaPrima, Cenario cenario) {
         this.materiaPrima = materiaPrima;
         this.budget = cenario.getBudgetInicial();
@@ -34,14 +33,12 @@ public class GerenciadorProducao {
         this.catalogoProdutos = new ArrayList<>();
     }
 
-    /*Consulta de cenario*/
-
+    /* Consulta de cenario */
     public String getNomeCenarioAtivo() {
         return cenarioAtivo.name();
     }
 
-    /*Métodos de registro*/
-
+    /* Métodos de registro */
     public void registrarMaquina(Maquina novaMaquina) {
         this.maquinas.add(novaMaquina);
     }
@@ -67,8 +64,7 @@ public class GerenciadorProducao {
         this.demandas.add(novaDemanda);
     }
 
-    /*Metódos da estrategia*/
-
+    /* Metódos da estrategia */
     public void setEstrategia(EstrategiaProducao novaEstrategia) {
         this.estrategiaAtual = novaEstrategia;
         System.out.println("Estratégia de produção alterada para: " + novaEstrategia.getNomeEstrategia());
@@ -78,8 +74,7 @@ public class GerenciadorProducao {
         return (estrategiaAtual != null) ? estrategiaAtual.getNomeEstrategia() : "Nenhuma estratégia definida";
     }
 
-    /*Métodos de produção e de demanda*/
-
+    /* Métodos de produção e de demanda */
     public void fabricarDemanda(Produto produtoRequerido, Demanda demandaRequerida) {
         if (demandaRequerida.getStatus() != StatusDemanda.PENDENTE) {
             System.out.println("Esta demanda não está mais pendente (status atual: " + demandaRequerida.getStatus() + ")");
@@ -92,35 +87,34 @@ public class GerenciadorProducao {
 
         demandaRequerida.iniciarProducao();
 
-        //Verificação de custo
+        // Verificação de custo
         if (!demandaRequerida.viavelFinanceiramente(this.budget)) {
             System.out.println("Erro: Orçamento insuficiente para cobrir o custo de produção (R$ " + custoTotal + ")");
             demandaRequerida.cancelar("Orçamento insuficiente");
             return;
         }
 
-        //Verificação de quantidade de matéria-prima disponível
+        // Verificação de quantidade de matéria-prima disponível
         if (!this.materiaPrima.verificarDisponibilidade(materiaPrimaNecessaria)) {
             System.out.println("Erro: Matéria-prima insuficiente");
             demandaRequerida.cancelar("Matéria-prima insuficiente");
             return;
         }
 
-        this.budget -= custoTotal; //desconto
+        this.budget -= custoTotal; // desconto
         this.materiaPrima.consumir(materiaPrimaNecessaria);
 
         for (Maquina m : this.maquinas) {
             m.ligar();
         }
 
-        //Produção
+        // Produção
         for (int i = 0; i < totalPecas; i++) {
             String idNovo = produtoRequerido.getId() + "-" + i;
             Produto peca = produtoRequerido.criarNovaUnidade(idNovo);
 
             for (Maquina m : this.maquinas) {
                 m.processar(peca);
-                m.aplicarDesgaste();
             }
             this.produtosFabricados.add(peca);
         }
@@ -171,13 +165,12 @@ public class GerenciadorProducao {
         }
     }
 
-    /*Métodos financeiros*/
-
+    /* Métodos financeiros */
     public void comprarMateriaPrima(int materiaAdicionada) {
         float custoCompra = materiaAdicionada * this.materiaPrima.getCustoPorUnidade();
 
         if (this.budget >= custoCompra) {
-            this.budget -= custoCompra; //desconto
+            this.budget -= custoCompra; // desconto
             this.materiaPrima.adicionarEstoque(materiaAdicionada);
             System.out.println("Compra realizada com sucesso!");
         } 
@@ -200,8 +193,7 @@ public class GerenciadorProducao {
         return custoPorPeca * quantidadePecas;
     }
 
-    /*Consultas + relatórios*/
-
+    /* Consultas + relatórios */
     public void exibirArmazem() {
         if (produtosFabricados.isEmpty()) {
             System.out.println("Armazém vazio.");
@@ -222,13 +214,14 @@ public class GerenciadorProducao {
         System.out.println("========== RELATÓRIO DE AUDITORIA ==========");
 
         System.out.println("-- Máquinas --");
-        for (Maquina m : maquinas) {
-            System.out.println(m.gerarRelatorioDiagnostico());
+        // Utilizando a interface Auditavel explicitamente para demonstrar polimorfismo
+        for (Auditavel a : maquinas) {
+            System.out.println(a.gerarRelatorioDiagnostico());
         }
 
         System.out.println("-- Produtos em armazém --");
-        for (Produto p : produtosFabricados) {
-            System.out.println(p.gerarRelatorioDiagnostico());
+        for (Auditavel a : produtosFabricados) {
+            System.out.println(a.gerarRelatorioDiagnostico());
         }
 
         System.out.println("=============================================");

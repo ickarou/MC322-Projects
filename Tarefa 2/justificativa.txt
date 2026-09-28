@@ -1,14 +1,14 @@
-Tarefa 2 - Expansão e Complexidade
+Tarefa 3 - Padrões de Projeto e Cenários de Produção
 Tema: Fábrica de Scanners Automotivos (Linha KTS 590)
 
 1. Justificativa da evolução do tema
-Mantivemos a fábrica de scanners KTS 590 porque o tema encaixou muito bem com os novos requisitos. Na indústria real, a produção de hardwares de diagnóstico lida exatamente com falhas imprevistas de maquinário, testes rigorosos de qualidade e gestão de custos. A base que montamos na Tarefa 1 serviu perfeitamente para aplicarmos as novas regras exigidas nesta etapa.
+Continuamos com a simulação da fábrica da linha KTS 590. A estrutura que consolidamos nas tarefas anteriores nos permitiu integrar os novos requisitos de forma bem natural. Em uma fábrica real, a operação não é engessada; a gerência precisa adaptar o ritmo de fabricação de acordo com o orçamento atual e o estado físico dos equipamentos. Essa dinâmica de chão de fábrica casou perfeitamente com a necessidade de implementar cenários variáveis e estratégias de seleção de demandas pedidas no roteiro.
 
-2. Aplicação dos conceitos da Tarefa 2
-Nesta atualização, a fábrica ficou bem mais dinâmica:
-- Herança e Abstração: Transformamos Produto e Maquina em classes abstratas. As subclasses agora representam as peças reais (Carcaça Superior, Inferior, Proteção) e as máquinas da linha (Injetora, Braço Robótico e Estação de Testes).
-- Aleatoriedade: Usamos o Random para simular falhas. Aplicamos a lógica pedida onde produtos com qualidade maior têm mais chance de serem reprovados na inspeção, somando isso às falhas que as máquinas repassam para a peça durante a montagem.
-- Coleções e Budget: O uso de ArrayList facilitou o controle do armazém, do maquinário e das filas de demanda. Centralizamos a logística na classe GerenciadorProducao, que agora controla o orçamento da fábrica a cada compra de matéria-prima e ciclo operacional.
+2. Aplicação dos conceitos da Tarefa 3
+Nesta etapa, focamos em organizar a arquitetura do código e adicionar regras de negócio mais próximas da realidade:
+Enums e Cenários: Substituímos o controle de status solto pelo Enum StatusDemanda (Pendente, Em Produção, etc.). Também criamos o Enum Cenario (Ideal e Apocalíptico), que agora é injetado no início do programa para definir o orçamento da fábrica e os multiplicadores de falha e desgaste das máquinas.
+Interfaces e Polimorfismo: Criamos a interface Auditavel, que passou a ser assinada pelas máquinas e pelos produtos. Com isso, usamos o polimorfismo no Gerenciador de Produção para varrer o maquinário e o armazém em um único loop, gerando um relatório de diagnóstico integrado.
+Padrão Strategy e Desgaste: Retiramos a escolha engessada de pedidos e aplicamos o padrão Strategy através da interface EstrategiaProducao. Agora, o sistema pode alternar em tempo de execução entre estratégias como "Linha de Montagem" (ordem de chegada) ou "Meta de Orçamento" (foco no custo-benefício). Além disso, adicionamos a mecânica de desgaste: cada ciclo de processamento reduz a saúde da máquina, aumentando gradativamente a chance de gerar peças defeituosas.
 
 3. Visão de expansão futura
-Como o andamento do projeto é ditado pelos roteiros da disciplina, nossa visão de expansão é continuar escalando a complexidade da fábrica do KTS 590 em paralelo com a ementa. O objetivo é deixar a linha de montagem e o produto cada vez mais realistas e robustos, aplicando e adaptando o nosso chão de fábrica aos novos conceitos e exigências que o professor introduzir nas próximas tarefas do semestre.
+Seguimos com a mesma mentalidade das etapas anteriores: o rumo do projeto e as próximas melhorias dependem 100% dos roteiros da disciplina. Nossa ideia é manter a fábrica do KTS 590 como ambiente base, adaptando a estrutura atual e refatorando o que for necessário apenas para acomodar os novos conceitos e exigências que o professor apresentar nas tarefas futuras do semestre.

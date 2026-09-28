@@ -1,12 +1,12 @@
 /* Subclasse Estação de testes (Classe Máquina)
-*
-* Tarefa 3
-*
-* última modificação: 23/09/2026
-*
-* Material para a disciplina MC322 - Programação orientada a objetos
-*
-*/
+ *
+ * Tarefa 3
+ *
+ * última modificação: 28/09/2026
+ *
+ * Material para a disciplina MC322 - Programação orientada a objetos
+ *
+ */
 
 public class EstacaoTestes extends Maquina {
     
@@ -26,15 +26,18 @@ public class EstacaoTestes extends Maquina {
             return false;
         }
 
-        //chance de rejeição baseada na qualidade do produto e das falhas acumuladas nas máquinas anteriores
+        // chance de rejeição baseada na qualidade do produto e das falhas acumuladas nas máquinas anteriores
         float chanceRejeicao = (produto.getProbabilidadeFalhaAcumulada() * 0.5f) + (produto.getQualidade() * 0.2f);
         
-        //verifica se a peça física tem defeito sorteando um número com math.random
+        // verifica se a peça física tem defeito sorteando um número com math.random
         boolean produtoComDefeito = Math.random() < chanceRejeicao;
 
         boolean maquinaFalhou = verificarFalha();
 
-        //se maquina de teste falhar ela realiza um inspeção incorreta
+        // A máquina rodou, então aplica o desgaste natural do ciclo
+        aplicarDesgaste();
+
+        // se maquina de teste falhar ela realiza um inspeção incorreta
         if (maquinaFalhou) {
             System.out.println("[ERRO DE SENSOR] A " + getNome() + " desregulou e gerou uma inspeção incorreta para " + produto.getNome() + "!");
             boolean laudoIncorreto = !produtoComDefeito;

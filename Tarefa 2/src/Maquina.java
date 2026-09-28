@@ -1,18 +1,18 @@
 /* Classe Abstrata Máquina
-*
-* Tarefa 3
-*
-* última modificação: 24/09/2026
-*
-* Material para a disciplina MC322 - Programação orientada a objetos
-*
-*/
+ *
+ * Tarefa 3
+ *
+ * última modificação: 24/09/2026
+ *
+ * Material para a disciplina MC322 - Programação orientada a objetos
+ *
+ */
 
 import java.util.Random;
 
 public abstract class Maquina implements Auditavel {
     
-    //Atributos privados
+    // Atributos privados
     private String nome;
     private boolean ligada;
     private int capacidadeMaxima;
@@ -25,7 +25,7 @@ public abstract class Maquina implements Auditavel {
     protected float fatorFalha;
     private float fatorDesgaste;
 
-    //Construtor
+    // Construtor
     public Maquina(String nome, int capacidadeMaxima, float probabilidadeFalhaBase, float custoOperacao, Cenario cenario) {
         this.nome = nome;
         this.capacidadeMaxima = capacidadeMaxima;
@@ -36,12 +36,12 @@ public abstract class Maquina implements Auditavel {
         this.ligada = false;
     }
 
-    //Métodos Abstratos
+    // Métodos Abstratos
     public abstract boolean processar(Produto produto);
 
     public abstract String getTipo();
 
-    //Métodos Concretos
+    // Métodos Concretos
     public void ligar(){
         if(estaQuebrada()){
             System.out.println(">>ATENÇÃO! A máquina " + this.nome + " está quebrada! Enviar para a manutenção imediatamente.");
@@ -60,16 +60,17 @@ public abstract class Maquina implements Auditavel {
         return ligada;
     }
 
+    // Aumenta a chance de falha conforme a máquina desgasta
     protected boolean verificarFalha() {
-        float porcentagemDesgaste = (100 - this.saude)/100f; //se a saude estiver em 100 vira 0%
+        float porcentagemDesgaste = (100 - this.saude)/100f; // se a saude estiver em 100 vira 0%
         float chanceReal = this.probabilidadeFalha + (porcentagemDesgaste * probabilidadeFalha);
         return random.nextFloat() < chanceReal;
     }
 
     public void aplicarDesgaste(){
-        int desgasteBase = random.nextInt(4);
+        int desgasteBase = random.nextInt(4); // reduz a saude com um valor aleatorio entre 0 e 3
         int desgasteReal = Math.round(desgasteBase * this.fatorDesgaste);
-        this.saude = Math.max(0, this.saude - desgasteReal); //limite inferior de 0
+        this.saude = Math.max(0, this.saude - desgasteReal); // limite inferior de 0 para não bugar
     }
 
     public boolean estaQuebrada(){
@@ -81,7 +82,7 @@ public abstract class Maquina implements Auditavel {
         System.out.println("A maquina " + this.nome + " passou por reparos e está a todo vapor de novo!");
     }
 
-    //Getters
+    // Getters
     public String getNome(){
         return nome;
     }
@@ -98,7 +99,7 @@ public abstract class Maquina implements Auditavel {
         return capacidadeMaxima;
     }
     
-    //Implementação Interface Auditavel
+    // Implementação Interface Auditavel
     @Override 
     public String gerarRelatorioDiagnostico(){
         if (this.saude < 50){

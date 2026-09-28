@@ -1,22 +1,21 @@
-/*Demanda.java
-*
-* Tarefa 3
-*
-* última modificação: 23/09/2026
-*
-* Material para a disciplina MC322 - Programação orientada a objetos
-*
-*/
+/* Demanda.java
+ *
+ * Tarefa 3
+ * 
+ * última modificação: 23/09/2026
+ * Material para a disciplina MC322 - Programação orientada a objetos
+ *
+ */
 
 public class Demanda {
     
-    /*Atributos privados*/
+    /* Atributos privados */
     private String tipoProduto;
     private int quantidadeProdutos;
     private StatusDemanda status;
     private double custoUnitario;
 
-    /*Construtor*/
+    /* Construtor */
     public Demanda(String tipoProduto, int quantidadeProdutos){
         this.tipoProduto = tipoProduto;
         this.quantidadeProdutos = quantidadeProdutos;
@@ -24,14 +23,22 @@ public class Demanda {
         this.custoUnitario = 0.0;
     }
 
-    /*Métodos*/
+    /* Métodos */
     public void atualizarQuantidade(int quantidadeDemandada){
+        if (this.status == StatusDemanda.CONCLUIDA || this.status == StatusDemanda.CANCELADA) {
+            throw new IllegalStateException("Não é possível atualizar a quantidade de uma demanda finalizada ou cancelada.");
+        }
+        
         this.quantidadeProdutos += quantidadeDemandada;
+        
+        // Se adicionaram mais itens enquanto fabricava, volta para pendente para reavaliar os custos
+        if (this.status == StatusDemanda.EM_PRODUCAO) {
+            this.status = StatusDemanda.PENDENTE;
+        }
     }
 
     public int calcularMateriaPrimaNecessaria(Produto produtoDemandado){
-        int totalNecessario = this.quantidadeProdutos * produtoDemandado.getQuantidadeMateriaPrimaPorUnidade();
-        return totalNecessario;
+        return this.quantidadeProdutos * produtoDemandado.getQuantidadeMateriaPrimaPorUnidade();
     }
 
     public void definirCustoUnitarioEstimado(double custo) {
@@ -46,6 +53,7 @@ public class Demanda {
         return calcularCustoTotalEstimado() <= orcamentoDisponivel;
     }
 
+    /* Getters */
     public String getTipoProduto() {
         return tipoProduto;
     }
@@ -58,26 +66,26 @@ public class Demanda {
         return status;
     }
 
+    /* Transições de Estado */
     public void iniciarProducao(){
-        if (status != StatusDemanda.PENDENTE){
-            throw new IllegalStateException("Só é possível iniciar produção de uma demanda PENDENTE");
+        if (this.status != StatusDemanda.PENDENTE){
+            throw new IllegalStateException("Só é possível iniciar produção de uma demanda PENDENTE.");
         }
         this.status = StatusDemanda.EM_PRODUCAO;
     }
 
     public void cancelar(String motivo){
-        if (status == StatusDemanda.CONCLUIDA){
-            throw new IllegalStateException("Não é possível cancelar uma demanda já concluída");
+        if (this.status == StatusDemanda.CONCLUIDA || this.status == StatusDemanda.CANCELADA){
+            throw new IllegalStateException("Não é possível cancelar uma demanda já concluída ou cancelada.");
         }
         this.status = StatusDemanda.CANCELADA;
         System.out.println("Demanda de " + tipoProduto + " cancelada. Motivo: " + motivo);
     }
 
     public void atender(){
-        if (status == StatusDemanda.CANCELADA){
-            throw new IllegalStateException("Não é possível atender um pedido cancelado");
+        if (this.status == StatusDemanda.CANCELADA){
+            throw new IllegalStateException("Não é possível atender um pedido cancelado.");
         }
-        status = StatusDemanda.CONCLUIDA;
+        this.status = StatusDemanda.CONCLUIDA;
     }
-    
 }

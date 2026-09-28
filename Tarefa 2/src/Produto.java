@@ -1,16 +1,16 @@
 /* Classe Abstrata Produto
-*
-* Tarefa 3
-*
-* última modificação: 24/09/2026
-*
-* Material para a disciplina MC322 - Programação orientada a objetos
-*
-*/
+ *
+ * Tarefa 3
+ *
+ * última modificação: 24/09/2026
+ *
+ * Material para a disciplina MC322 - Programação orientada a objetos
+ *
+ */
 
-public abstract class Produto implements Auditavel{
+public abstract class Produto implements Auditavel {
     
-    //Atributos privados
+    // Atributos privados
     private String id;
     private String nome;
     private String status;
@@ -19,7 +19,7 @@ public abstract class Produto implements Auditavel{
     private float probabilidadeFalhaAcumulada;
     private static int totalProdutosFabricados = 0; 
 
-    //Construtor
+    // Construtor
     public Produto(String id, String nome, int quantidadeMateriaPrimaPorUnidade, float qualidade) {
         this.id = id;
         this.nome = nome;
@@ -32,7 +32,7 @@ public abstract class Produto implements Auditavel{
         totalProdutosFabricados++;
     }
 
-    //Métodos Abstratos
+    // Métodos Abstratos
     public abstract void processar();
 
     public abstract int calcularTempoProducao();
@@ -41,7 +41,7 @@ public abstract class Produto implements Auditavel{
 
     public abstract Produto criarNovaUnidade(String id);
 
-    //Métodos Concretos
+    // Métodos Concretos
     public void setStatus(String newStatus){
         this.status = newStatus;
     }
@@ -50,7 +50,7 @@ public abstract class Produto implements Auditavel{
         this.probabilidadeFalhaAcumulada += probabilidadeMaquina;
     }
     
-    //Getters
+    // Getters
     public String getId(){
         return id;
     } 
@@ -79,10 +79,10 @@ public abstract class Produto implements Auditavel{
         return totalProdutosFabricados;
     }
 
-    //Implementação da interface Auditavel
+    // Implementação da interface Auditavel
     @Override 
     public String gerarRelatorioDiagnostico(){
-        return "O produto " + this.nome + " de qualidade: " + this.qualidade + " está em " + (this.probabilidadeFalhaAcumulada * 100) + "% de falhar";
+        return "O produto " + this.nome + " de qualidade: " + this.qualidade + " tem " + (this.probabilidadeFalhaAcumulada * 100) + "% de chance de falha";
     }
 
     @Override 

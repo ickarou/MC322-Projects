@@ -1,3 +1,11 @@
+/* Estratégia Meta de Orçamento (Maximizar Produção)
+ *
+ * Tarefa 3
+ *
+ * Material para a disciplina MC322 - Programação orientada a objetos
+ *
+ */
+
 import java.util.List;
 
 public class EstrategiaMetaDeOrcamento implements EstrategiaProducao {

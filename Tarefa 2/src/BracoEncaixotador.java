@@ -1,20 +1,20 @@
 /* Subclasse Braço Encaixotador (Classe Máquina)
-*
-* Tarefa 3
-*
-* última modificação: 23/09/2026
-*
-* Material para a disciplina MC322 - Programação orientada a objetos
-*
-*/
+ *
+ * Tarefa 3
+ *
+ * última modificação: 23/09/2026
+ *
+ * Material para a disciplina MC322 - Programação orientada a objetos
+ *
+ */
 
-public class BracoEncaixotador extends Maquina{
+public class BracoEncaixotador extends Maquina {
     
     public BracoEncaixotador(String nome, Cenario cenario){
         super(nome, 1000, 0.10f, 100.00f, cenario);
     }
 
-    /*Métodos da classe principal*/
+    /* Métodos da classe principal */
     @Override 
     public boolean processar(Produto produto) {
         if (!estaLigada()) {
@@ -28,13 +28,18 @@ public class BracoEncaixotador extends Maquina{
         }
 
         if (verificarFalha()) { 
-            produto.aumentarProbabilidadeFalha(0.10f); 
+            // O fatorFalha agora escala a gravidade da falha dependendo do cenário escolhido
+            produto.aumentarProbabilidadeFalha(0.10f * this.fatorFalha); 
             System.out.println("AVISO: Ocorreu um problema nas juntas do " + getNome() + ". Probabilidade de defeito aumentada em " + produto.getNome() + ".");
         } else {
             System.out.println(produto.getNome() + " empacotado!");
         }
 
         produto.setStatus("Empacotamento realizado");
+        
+        // Aplica o desgaste natural da máquina após terminar o serviço
+        aplicarDesgaste();
+        
         return true;
     }
 

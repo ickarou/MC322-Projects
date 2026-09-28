@@ -1,3 +1,11 @@
+/* Estratégia Lote Crítico (Maior Demanda)
+ *
+ * Tarefa 3
+ *
+ * Material para a disciplina MC322 - Programação orientada a objetos
+ *
+ */
+
 import java.util.List;
 
 public class EstrategiaLoteCritico implements EstrategiaProducao{
