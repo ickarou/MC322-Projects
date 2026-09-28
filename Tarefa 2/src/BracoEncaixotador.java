@@ -28,8 +28,8 @@ public class BracoEncaixotador extends Maquina {
         }
 
         if (verificarFalha()) { 
-            // O fatorFalha agora escala a gravidade da falha dependendo do cenário escolhido
-            produto.aumentarProbabilidadeFalha(0.10f * this.fatorFalha); 
+            // O fatorFalha escala a gravidade da falha dependendo do cenário escolhido
+            produto.aumentarProbabilidadeFalha(0.10f * getFatorFalha()); 
             System.out.println("AVISO: Ocorreu um problema nas juntas do " + getNome() + ". Probabilidade de defeito aumentada em " + produto.getNome() + ".");
         } else {
             System.out.println(produto.getNome() + " empacotado!");

@@ -23,6 +23,6 @@ public class EstrategiaLinhaDeMontagem implements EstrategiaProducao {
 
     @Override 
     public String getNomeEstrategia(){
-        return "Estratégia Linha de Montagem: Prioriza a ordem de chegada";
+        return "Linha de Montagem";
     }
 }

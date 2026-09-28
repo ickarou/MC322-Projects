@@ -47,7 +47,7 @@ public abstract class Produto implements Auditavel {
     }
 
     public void aumentarProbabilidadeFalha(float probabilidadeMaquina){
-        this.probabilidadeFalhaAcumulada += probabilidadeMaquina;
+        this.probabilidadeFalhaAcumulada = Math.min(1.0f, this.probabilidadeFalhaAcumulada + probabilidadeMaquina);
     }
     
     // Getters
@@ -82,11 +82,13 @@ public abstract class Produto implements Auditavel {
     // Implementação da interface Auditavel
     @Override 
     public String gerarRelatorioDiagnostico(){
-        return "O produto " + this.nome + " de qualidade: " + this.qualidade + " tem " + (this.probabilidadeFalhaAcumulada * 100) + "% de chance de falha";
+        return String.format("O produto %s de qualidade: %.2f tem %.1f%% de chance de falha",
+                this.nome, this.qualidade, this.probabilidadeFalhaAcumulada * 100);
     }
 
+    // Limiar de risco: nos cenários da simulação, uma falha de máquina já leva a peça a esse nível
     @Override 
     public boolean precisaManutencao(){
-        return this.probabilidadeFalhaAcumulada >= 0.5f;
+        return this.probabilidadeFalhaAcumulada >= 0.2f;
     }
 }

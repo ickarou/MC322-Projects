@@ -33,7 +33,6 @@ public class ProtecaoLateral extends Produto {
 
     @Override
     public Produto criarNovaUnidade(String id){
-        // Corrigido para instanciar a classe certa
         return new ProtecaoLateral(id);
     }
 }

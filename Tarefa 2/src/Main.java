@@ -8,15 +8,9 @@
  *
  */
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-
-    private static final String[] NOMES_PRODUTOS = {
-        "Carcaça Superior", "Carcaça Inferior", "Proteção Lateral"
-    };
 
     /* Leitura de inteiros com validação de tipo e de intervalo */
     private static int lerInteiro(Scanner scanner, String prompt, int min, int max) {
@@ -38,29 +32,39 @@ public class Main {
     /* Renovação da demanda: lote finalizado gera um novo, lote aberto recebe a quantidade extra */
     private static void atualizarDemanda(GerenciadorProducao gerenciador, Demanda[] demandas,
                                          Produto[] moldes, int indice, int qtd) {
+        String tipo = moldes[indice].getTipo();
         Demanda atual = demandas[indice];
         if (atual.getStatus() == StatusDemanda.CONCLUIDA || atual.getStatus() == StatusDemanda.CANCELADA) {
-            demandas[indice] = new Demanda(NOMES_PRODUTOS[indice], qtd);
+            demandas[indice] = new Demanda(tipo, qtd);
             gerenciador.registrarDemanda(demandas[indice], moldes[indice]);
-            System.out.println("Sucesso! Novo lote gerado para " + NOMES_PRODUTOS[indice] + ".");
+            System.out.println("Sucesso! Novo lote gerado para " + tipo + ".");
         } else {
-            gerenciador.atualizarDemanda(NOMES_PRODUTOS[indice], qtd);
+            gerenciador.atualizarDemanda(tipo, qtd);
         }
     }
 
     private static void submenuDemandas(Scanner scanner, GerenciadorProducao gerenciador,
                                         Demanda[] demandas, Produto[] moldes) {
-        System.out.println("\n--- ATUALIZAR DEMANDAS ---");
-        System.out.println("[ 1 ] Carcaça Superior");
-        System.out.println("[ 2 ] Carcaça Inferior");
-        System.out.println("[ 3 ] Proteção Lateral");
-        System.out.println("[ 0 ] Voltar");
-        int opcao = lerInteiro(scanner, "Escolha o produto: ", 0, 3);
-        if (opcao == 0) {
-            return;
+        boolean noSubmenu = true;
+        while (noSubmenu) {
+            System.out.println("\n--- DEMANDAS ---");
+            System.out.println("[ 1 ] Atualizar: Carcaça Superior");
+            System.out.println("[ 2 ] Atualizar: Carcaça Inferior");
+            System.out.println("[ 3 ] Atualizar: Proteção Lateral");
+            System.out.println("[ 4 ] Listar demandas e status");
+            System.out.println("[ 0 ] Voltar");
+            int opcao = lerInteiro(scanner, "Escolha: ", 0, 4);
+
+            if (opcao == 0) {
+                noSubmenu = false;
+            } else if (opcao == 4) {
+                System.out.println();
+                gerenciador.listarDemandas();
+            } else {
+                int qtd = lerInteiro(scanner, "Quantidade extra: ", 1, 100000);
+                atualizarDemanda(gerenciador, demandas, moldes, opcao - 1, qtd);
+            }
         }
-        int qtd = lerInteiro(scanner, "Quantidade extra: ", 1, 100000);
-        atualizarDemanda(gerenciador, demandas, moldes, opcao - 1, qtd);
     }
 
     private static void submenuProducao(Scanner scanner, GerenciadorProducao gerenciador,
@@ -82,12 +86,8 @@ public class Main {
                 gerenciador.executarProximaProducao();
             } else {
                 int indice = opcao - 2;
-                if (demandas[indice].getQuantidadeProdutos() <= 0) {
-                    System.out.println("  [AVISO] Não há pedido aberto para " + NOMES_PRODUTOS[indice] + ". Atualize a demanda primeiro.");
-                } else {
-                    System.out.println("\n>>> INICIANDO LOTE: " + NOMES_PRODUTOS[indice].toUpperCase() + " <<<");
-                    gerenciador.fabricarDemanda(moldes[indice], demandas[indice]);
-                }
+                System.out.println("\n>>> INICIANDO LOTE: " + moldes[indice].getTipo().toUpperCase() + " <<<");
+                gerenciador.fabricarDemanda(moldes[indice], demandas[indice]);
             }
         }
     }
@@ -105,7 +105,7 @@ public class Main {
             if (opcao == 0) {
                 noSubmenu = false;
             } else if (opcao == 1) {
-                System.out.println("\n--- RELATÓRIO DO ARMAZÉM ---");
+                System.out.println();
                 gerenciador.exibirArmazem();
             } else {
                 System.out.println("\n--- RELATÓRIO DO ALMOXARIFADO ---");
@@ -131,27 +131,29 @@ public class Main {
         }
     }
 
-    private static void submenuAuditoria(Scanner scanner, GerenciadorProducao gerenciador,
-                                         List<Maquina> maquinas) {
+    private static void submenuAuditoria(Scanner scanner, GerenciadorProducao gerenciador) {
         boolean noSubmenu = true;
         while (noSubmenu) {
-            System.out.println("\n--- AUDITORIA ---");
+            System.out.println("\n--- AUDITORIA E MANUTENÇÃO ---");
             System.out.println("[ 1 ] Relatório geral da planta");
             System.out.println("[ 2 ] Detalhar máquinas");
+            System.out.println("[ 3 ] Detalhar produtos");
+            System.out.println("[ 4 ] Enviar máquinas para manutenção");
             System.out.println("[ 0 ] Voltar");
-            int opcao = lerInteiro(scanner, "Escolha: ", 0, 2);
+            int opcao = lerInteiro(scanner, "Escolha: ", 0, 4);
 
             if (opcao == 0) {
                 noSubmenu = false;
             } else if (opcao == 1) {
                 gerenciador.gerarAuditoriaGeral();
+            } else if (opcao == 2) {
+                System.out.println();
+                gerenciador.detalharMaquinas();
+            } else if (opcao == 3) {
+                System.out.println();
+                gerenciador.detalharProdutos();
             } else {
-                System.out.println("\n--- DIAGNÓSTICO DAS MÁQUINAS ---");
-                for (Maquina m : maquinas) {
-                    String situacao = m.precisaManutencao() ? "[MANUTENÇÃO NECESSÁRIA]" : "[OPERACIONAL]";
-                    System.out.println(m.getNome() + " " + situacao);
-                    System.out.println("  " + m.gerarRelatorioDiagnostico());
-                }
+                gerenciador.repararMaquinas();
             }
         }
     }
@@ -162,7 +164,7 @@ public class Main {
 
         /* Tela de Introdução */
         System.out.println("\n╔════════════════════════════════════════════════════════════════╗");
-        System.out.println("║        FÁBRICA DE COMPONENTES AUTOMOTIVOS - KTS 590            ║");
+        System.out.println("║        FÁBRICA DE SCANNERS AUTOMOTIVOS - KTS 590               ║");
         System.out.println("║      [V3.0] Estratégias de Produção e Auditoria Ativa          ║");
         System.out.println("╠════════════════════════════════════════════════════════════════╣");
         System.out.println("║  Operadores Logados: Eduardo Pontes e Icaro Amaral             ║");
@@ -188,14 +190,9 @@ public class Main {
         gerenciador.setEstrategia(new EstrategiaLinhaDeMontagem());
 
         /* 2. Criação Equipamentos (Agora recebem o cenário para calcular o desgaste) */
-        List<Maquina> maquinas = new ArrayList<>();
-        maquinas.add(new Injetora("Injetora CNC Alpha", cenarioEscolhido));
-        maquinas.add(new BracoEncaixotador("Braço Robótico KUKA", cenarioEscolhido));
-        maquinas.add(new EstacaoTestes("Estação de Diagnóstico ESI", cenarioEscolhido));
-
-        for (Maquina m : maquinas) {
-            gerenciador.registrarMaquina(m);
-        }
+        gerenciador.registrarMaquina(new Injetora("Injetora CNC Alpha", cenarioEscolhido));
+        gerenciador.registrarMaquina(new BracoEncaixotador("Braço Robótico KUKA", cenarioEscolhido));
+        gerenciador.registrarMaquina(new EstacaoTestes("Estação de Diagnóstico ESI", cenarioEscolhido));
 
         /* 3. Produtos Base */
         Produto[] moldes = {
@@ -205,10 +202,9 @@ public class Main {
         };
 
         /* 4. Demandas Iniciais */
-        Demanda[] demandas = new Demanda[NOMES_PRODUTOS.length];
-        for (int i = 0; i < NOMES_PRODUTOS.length; i++) {
-            demandas[i] = new Demanda(NOMES_PRODUTOS[i], 0);
-            gerenciador.registrarProduto(moldes[i]);
+        Demanda[] demandas = new Demanda[moldes.length];
+        for (int i = 0; i < moldes.length; i++) {
+            demandas[i] = new Demanda(moldes[i].getTipo(), 0);
             gerenciador.registrarDemanda(demandas[i], moldes[i]);
         }
 
@@ -225,7 +221,7 @@ public class Main {
             System.out.println("║  [ 3 ] Consultas (Armazém e Estoque)              ║");
             System.out.println("║  [ 4 ] Comprar Matéria-Prima                      ║");
             System.out.println("║  [ 5 ] Alterar Estratégia de Produção             ║");
-            System.out.println("║  [ 6 ] Auditoria                                  ║");
+            System.out.println("║  [ 6 ] Auditoria e Manutenção                     ║");
             System.out.println("║  [ 0 ] Encerrar Turno                             ║");
             System.out.println("╚═══════════════════════════════════════════════════╝");
 
@@ -260,7 +256,7 @@ public class Main {
                     break;
 
                 case 6: // SUBMENU DE AUDITORIA
-                    submenuAuditoria(scanner, gerenciador, maquinas);
+                    submenuAuditoria(scanner, gerenciador);
                     break;
 
                 case 0:

@@ -20,7 +20,7 @@ public interface EstrategiaProducao {
         List<Demanda> elegiveis = new ArrayList<>();
         
         for (Demanda d : demandas) {
-            if (d.getStatus() == StatusDemanda.PENDENTE) {
+            if (d.getStatus() == StatusDemanda.PENDENTE && d.getQuantidadeProdutos() > 0) {
                 elegiveis.add(d);
             }
         }

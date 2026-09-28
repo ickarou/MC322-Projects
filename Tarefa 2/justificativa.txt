@@ -1,14 +1,41 @@
-Tarefa 3 - Padrões de Projeto e Cenários de Produção
+Tarefa 3 - Padrões de Projeto, Interfaces e Enumerações
 Tema: Fábrica de Scanners Automotivos (Linha KTS 590)
+Dupla: Eduardo Pontes e Icaro Amaral
 
 1. Justificativa da evolução do tema
-Continuamos com a simulação da fábrica da linha KTS 590. A estrutura que consolidamos nas tarefas anteriores nos permitiu integrar os novos requisitos de forma bem natural. Em uma fábrica real, a operação não é engessada; a gerência precisa adaptar o ritmo de fabricação de acordo com o orçamento atual e o estado físico dos equipamentos. Essa dinâmica de chão de fábrica casou perfeitamente com a necessidade de implementar cenários variáveis e estratégias de seleção de demandas pedidas no roteiro.
+
+Continuamos com a linha KTS 590, que fabrica os componentes dos nossos scanners automotivos (carcaça superior, carcaça inferior e proteção lateral). Nas tarefas anteriores a fábrica aprendeu a produzir, a falhar e a controlar orçamento. Agora ela precisa aprender a decidir.
+
+Em uma fábrica real, o gerente de turno não fabrica sempre na mesma ordem: ele olha o caixa, o estado das máquinas e a pressão dos pedidos para escolher o que entra na linha primeiro. Foi essa ideia que guiou a Tarefa 3. Também quisemos que a fábrica tivesse "dias bons" e "dias ruins", por isso criamos dois cenários de turno: o Ideal, com caixa folgado e máquinas confiáveis, e o Apocalíptico, com caixa curto e equipamento que se desgasta rápido.
 
 2. Aplicação dos conceitos da Tarefa 3
-Nesta etapa, focamos em organizar a arquitetura do código e adicionar regras de negócio mais próximas da realidade:
-Enums e Cenários: Substituímos o controle de status solto pelo Enum StatusDemanda (Pendente, Em Produção, etc.). Também criamos o Enum Cenario (Ideal e Apocalíptico), que agora é injetado no início do programa para definir o orçamento da fábrica e os multiplicadores de falha e desgaste das máquinas.
-Interfaces e Polimorfismo: Criamos a interface Auditavel, que passou a ser assinada pelas máquinas e pelos produtos. Com isso, usamos o polimorfismo no Gerenciador de Produção para varrer o maquinário e o armazém em um único loop, gerando um relatório de diagnóstico integrado.
-Padrão Strategy e Desgaste: Retiramos a escolha engessada de pedidos e aplicamos o padrão Strategy através da interface EstrategiaProducao. Agora, o sistema pode alternar em tempo de execução entre estratégias como "Linha de Montagem" (ordem de chegada) ou "Meta de Orçamento" (foco no custo-benefício). Além disso, adicionamos a mecânica de desgaste: cada ciclo de processamento reduz a saúde da máquina, aumentando gradativamente a chance de gerar peças defeituosas.
+
+Padrão Strategy
+Criamos a interface EstrategiaProducao e três estratégias com nomes ligados ao chão de fábrica:
+- Linha de Montagem: atende os pedidos na ordem de chegada (fila FIFO).
+- Lote Crítico: prioriza o pedido com maior quantidade de peças pendentes.
+- Meta de Orçamento: entre os pedidos que cabem no orçamento, escolhe o que gera mais peças.
+O GerenciadorProducao guarda apenas uma referência à interface (é o contexto do padrão) e não conhece nenhuma estratégia concreta. A troca é feita em tempo de execução pelo menu e o efeito aparece na próxima produção automática. As estratégias apenas escolhem a demanda; quem mexe em orçamento e estoque é o gerenciador. O filtro de demandas elegíveis (pendentes e com quantidade maior que zero) ficou como método padrão da interface, para não repetir o código nas três classes.
+
+Enums
+- StatusDemanda (PENDENTE, EM_PRODUCAO, CONCLUIDA, CANCELADA) substituiu o boolean da Tarefa 2. As transições são validadas na classe Demanda, por exemplo: não é possível concluir uma demanda cancelada. O menu de demandas lista o status e a descrição de cada pedido.
+- Cenario (IDEAL e APOCALIPTICO) reúne o nome de exibição, o orçamento inicial e os fatores de falha e de desgaste. Ideal: R$ 20000, falha x0.5, desgaste x1.0. Apocalíptico: R$ 5000, falha x2.0, desgaste x2.5. O cenário é escolhido na abertura do programa e entregue ao gerenciador e às máquinas.
+
+Interface Auditavel e polimorfismo
+Máquinas e produtos, que pertencem a hierarquias diferentes, implementam Auditavel (relatório de diagnóstico e necessidade de manutenção). O relatório de auditoria percorre máquinas e produtos por meio da interface, sem saber o tipo concreto de cada um. Há também as opções de detalhar máquinas e detalhar produtos.
+
+Desgaste e manutenção
+A cada uso, a máquina perde uma pequena quantidade aleatória de saúde (0 a 3 pontos, multiplicada pelo fator do cenário), e a chance de falha cresce conforme a saúde cai. Máquina com saúde 0 está quebrada e a produção não começa, e se uma máquina quebrar no meio de um lote a produção é interrompida e as peças que não entraram na linha devolvem orçamento e matéria-prima. Para não deixar a fábrica sem saída, incluímos o reparo: a manutenção custa dinheiro do orçamento, proporcional ao desgaste, e pode ser pedida no submenu de auditoria.
+
+Peças reprovadas e armazém
+Peça reprovada na inspeção é descartada e não vai para o armazém. Se sobraram peças a refazer, a demanda continua pendente só com essa quantidade, e ela só é concluída quando todas as peças forem aprovadas. O armazém é exibido por lote de produção (LOTE-001, LOTE-002...), com tipo, quantidade, qualidade média e peças em risco, seguido do total por tipo e do histórico de reprovadas. Ele é separado da consulta de matéria-prima, que mostra o estoque de insumos.
+
+Orçamento
+O orçamento é debitado na compra de matéria-prima, na operação das máquinas e no reparo. A viabilidade de uma demanda considera apenas o custo de operação, porque a matéria-prima já foi paga na compra.
+
+Menu e organização
+O menu principal mostra cenário, estratégia e orçamento e leva a submenus (Demandas, Produção, Consultas, Estratégia, Auditoria e Manutenção), todos com a opção Voltar. Toda entrada passa por um método de leitura que só aceita números dentro do intervalo esperado. Cada classe, interface e enum está em seu próprio arquivo.
 
 3. Visão de expansão futura
-Seguimos com a mesma mentalidade das etapas anteriores: o rumo do projeto e as próximas melhorias dependem 100% dos roteiros da disciplina. Nossa ideia é manter a fábrica do KTS 590 como ambiente base, adaptando a estrutura atual e refatorando o que for necessário apenas para acomodar os novos conceitos e exigências que o professor apresentar nas tarefas futuras do semestre.
+
+Seguimos usando a linha KTS 590 como ambiente base, adaptando a estrutura para acomodar os conceitos que forem pedidos nas próximas tarefas. Duas ideias que gostaríamos de explorar: um enum para o status dos produtos (hoje é texto livre) e uma seed configurável para o Random, permitindo comparar os dois cenários com sorteios reproduzíveis.

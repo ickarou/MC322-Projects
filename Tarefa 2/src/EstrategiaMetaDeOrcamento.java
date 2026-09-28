@@ -27,6 +27,6 @@ public class EstrategiaMetaDeOrcamento implements EstrategiaProducao {
 
     @Override
     public String getNomeEstrategia(){
-        return "Estratégia Meta de Orçamento: Máximo de Produtos custo benefício";
+        return "Meta de Orçamento";
     }
 }

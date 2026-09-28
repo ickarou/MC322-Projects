@@ -20,9 +20,9 @@ public abstract class Maquina implements Auditavel {
     private float custoOperacao;
     private Random random = new Random();
 
-    protected int saude = 100;
+    private int saude = 100;
 
-    protected float fatorFalha;
+    private float fatorFalha;
     private float fatorDesgaste;
 
     // Construtor
@@ -60,11 +60,16 @@ public abstract class Maquina implements Auditavel {
         return ligada;
     }
 
+    // Sorteia um evento com a chance informada, usando o mesmo gerador da máquina
+    protected boolean sortearChance(float chance) {
+        return random.nextFloat() < chance;
+    }
+
     // Aumenta a chance de falha conforme a máquina desgasta
     protected boolean verificarFalha() {
         float porcentagemDesgaste = (100 - this.saude)/100f; // se a saude estiver em 100 vira 0%
         float chanceReal = this.probabilidadeFalha + (porcentagemDesgaste * probabilidadeFalha);
-        return random.nextFloat() < chanceReal;
+        return sortearChance(chanceReal);
     }
 
     public void aplicarDesgaste(){
@@ -89,6 +94,10 @@ public abstract class Maquina implements Auditavel {
 
     public int getSaude(){
         return saude;
+    }
+
+    protected float getFatorFalha(){
+        return fatorFalha;
     }
 
     public float getCustoOperacao(){

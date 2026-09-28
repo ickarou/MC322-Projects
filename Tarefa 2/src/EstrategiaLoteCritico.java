@@ -26,6 +26,6 @@ public class EstrategiaLoteCritico implements EstrategiaProducao{
 
     @Override 
     public String getNomeEstrategia(){
-        return "Estratégia Lote Crítico: Prioriza os itens de maior demanda pendente";
+        return "Lote Crítico";
     }
 }

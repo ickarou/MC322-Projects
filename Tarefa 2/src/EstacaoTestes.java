@@ -29,8 +29,8 @@ public class EstacaoTestes extends Maquina {
         // chance de rejeição baseada na qualidade do produto e das falhas acumuladas nas máquinas anteriores
         float chanceRejeicao = (produto.getProbabilidadeFalhaAcumulada() * 0.5f) + (produto.getQualidade() * 0.2f);
         
-        // verifica se a peça física tem defeito sorteando um número com math.random
-        boolean produtoComDefeito = Math.random() < chanceRejeicao;
+        // verifica se a peça física tem defeito sorteando um número aleatório
+        boolean produtoComDefeito = sortearChance(chanceRejeicao);
 
         boolean maquinaFalhou = verificarFalha();
 
@@ -40,14 +40,16 @@ public class EstacaoTestes extends Maquina {
         // se maquina de teste falhar ela realiza um inspeção incorreta
         if (maquinaFalhou) {
             System.out.println("[ERRO DE SENSOR] A " + getNome() + " desregulou e gerou uma inspeção incorreta para " + produto.getNome() + "!");
-            boolean laudoIncorreto = !produtoComDefeito;
+
+            // o sensor desregulado inverte o veredito: aprova peça com defeito e reprova peça boa
+            boolean aprovadoPeloSensor = produtoComDefeito;
             
-            if (laudoIncorreto) {
+            if (aprovadoPeloSensor) {
                 produto.setStatus("Aprovado Indevidamente");
             } else {
                 produto.setStatus("Reprovado Indevidamente");
             }
-            return laudoIncorreto;
+            return aprovadoPeloSensor;
         }
 
         if (produtoComDefeito) {
