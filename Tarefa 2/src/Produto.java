@@ -17,6 +17,7 @@ public abstract class Produto implements Auditavel {
     private int quantidadeMateriaPrimaPorUnidade;
     private float qualidade;
     private float probabilidadeFalhaAcumulada;
+    private String lote; 
     private static int totalProdutosFabricados = 0; 
 
     // Construtor
@@ -75,6 +76,14 @@ public abstract class Produto implements Auditavel {
         return probabilidadeFalhaAcumulada;
     }
 
+    public void setLote(String lote){
+        this.lote = lote;
+    }
+
+    public String getLote(){
+        return lote;
+    }
+
     public static int getTotalProdutosFabricados() {
         return totalProdutosFabricados;
     }
@@ -86,7 +95,6 @@ public abstract class Produto implements Auditavel {
                 this.nome, this.qualidade, this.probabilidadeFalhaAcumulada * 100);
     }
 
-    // Limiar de risco: nos cenários da simulação, uma falha de máquina já leva a peça a esse nível
     @Override 
     public boolean precisaManutencao(){
         return this.probabilidadeFalhaAcumulada >= 0.2f;

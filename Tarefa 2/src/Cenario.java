@@ -11,7 +11,7 @@ public enum Cenario {
     /* Cenários */
     // Ordem: Nome, Budget, falha da maquina, desgaste por uso
     IDEAL("Ideal", 25000.0f, 0.5f, 1.0f),
-    APOCALIPTICO("Apocalíptico", 10000.0f, 2.0f, 2.5f);
+    APOCALIPTICO("Apocalíptico", 4000.0f, 2.0f, 2.5f);
 
     private String nomeExibicao;
     private float budgetInicial;

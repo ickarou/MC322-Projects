@@ -9,9 +9,6 @@
  */
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class GerenciadorProducao {
 
@@ -27,7 +24,6 @@ public class GerenciadorProducao {
     private ArrayList<Produto> produtosFabricados;
     private ArrayList<Maquina> maquinas;
     private ArrayList<Produto> catalogoProdutos;
-    private HashMap<Produto, String> lotePorProduto;
     private int contadorLotes;
     private int totalRejeitados;
 
@@ -40,7 +36,6 @@ public class GerenciadorProducao {
         this.produtosFabricados = new ArrayList<>();
         this.maquinas = new ArrayList<>();
         this.catalogoProdutos = new ArrayList<>();
-        this.lotePorProduto = new HashMap<>();
         this.contadorLotes = 0;
         this.totalRejeitados = 0;
     }
@@ -70,7 +65,7 @@ public class GerenciadorProducao {
         return null;
     }
 
-    /* O custo unitário estimado considera apenas a operação das máquinas, pois a matéria-prima já foi paga na compra */
+    //O custo unitário estimado considera apenas a operação das máquinas, pois a matéria-prima já foi paga na compra
     public void registrarDemanda(Demanda novaDemanda, Produto produtoAssociado) {
         registrarProduto(produtoAssociado);
         novaDemanda.definirCustoUnitarioEstimado(calcularCustoProducao(1));
@@ -146,11 +141,11 @@ public class GerenciadorProducao {
 
             String idNovo = lote + "-" + produtoRequerido.getId() + "-" + (i + 1);
             Produto peca = produtoRequerido.criarNovaUnidade(idNovo);
+            peca.setLote(lote);
             processadas++;
 
             if (processarNaLinha(peca)) {
                 this.produtosFabricados.add(peca);
-                this.lotePorProduto.put(peca, lote);
                 aprovadas++;
             } else {
                 peca.setStatus("Rejeitada na inspeção");
@@ -323,12 +318,26 @@ public class GerenciadorProducao {
     }
 
     /* Consultas + relatórios */
-    private LinkedHashMap<String, ArrayList<Produto>> agruparPorLote() {
-        LinkedHashMap<String, ArrayList<Produto>> lotes = new LinkedHashMap<>();
+
+    private ArrayList<String> listarLotesUnicos() {
+        ArrayList<String> lotes = new ArrayList<>();
         for (Produto p : produtosFabricados) {
-            lotes.computeIfAbsent(lotePorProduto.get(p), chave -> new ArrayList<>()).add(p);
+            if (!lotes.contains(p.getLote())) {
+                lotes.add(p.getLote());
+            }
         }
         return lotes;
+    }
+
+    // Retorna todas as peças de produtosFabricados que pertencem a um lote específico.
+    private ArrayList<Produto> buscarPecasDoLote(String lote) {
+        ArrayList<Produto> pecas = new ArrayList<>();
+        for (Produto p : produtosFabricados) {
+            if (p.getLote().equals(lote)) {
+                pecas.add(p);
+            }
+        }
+        return pecas;
     }
 
     private String sinalizarRisco(Auditavel a) {
@@ -345,10 +354,11 @@ public class GerenciadorProducao {
         System.out.println("--- ARMAZÉM DE PRODUTOS ACABADOS ---");
         System.out.printf("%-10s | %-20s | %4s | %-9s | %s%n", "Lote", "Tipo", "Qtd", "Qualidade", "Em risco");
 
-        Map<String, Integer> totaisPorTipo = new LinkedHashMap<>();
+        ArrayList<String> tiposEncontrados = new ArrayList<>();
+        ArrayList<Integer> totaisPorTipo = new ArrayList<>();
 
-        for (Map.Entry<String, ArrayList<Produto>> lote : agruparPorLote().entrySet()) {
-            ArrayList<Produto> pecas = lote.getValue();
+        for (String lote : listarLotesUnicos()) {
+            ArrayList<Produto> pecas = buscarPecasDoLote(lote);
             float somaQualidade = 0.0f;
             int emRisco = 0;
 
@@ -361,15 +371,21 @@ public class GerenciadorProducao {
 
             String tipo = pecas.get(0).getTipo();
             System.out.printf("%-10s | %-20s | %4d | %-9.2f | %d/%d%s%n",
-                    lote.getKey(), tipo, pecas.size(), somaQualidade / pecas.size(),
+                    lote, tipo, pecas.size(), somaQualidade / pecas.size(),
                     emRisco, pecas.size(), (emRisco > 0 ? "  [RISCO]" : ""));
 
-            totaisPorTipo.merge(tipo, pecas.size(), Integer::sum);
+            int indice = tiposEncontrados.indexOf(tipo);
+            if (indice == -1) {
+                tiposEncontrados.add(tipo);
+                totaisPorTipo.add(pecas.size());
+            } else {
+                totaisPorTipo.set(indice, totaisPorTipo.get(indice) + pecas.size());
+            }
         }
 
         System.out.println("Totais por tipo:");
-        for (Map.Entry<String, Integer> total : totaisPorTipo.entrySet()) {
-            System.out.printf("  %-20s %d un.%n", total.getKey(), total.getValue());
+        for (int i = 0; i < tiposEncontrados.size(); i++) {
+            System.out.printf("  %-20s %d un.%n", tiposEncontrados.get(i), totaisPorTipo.get(i));
         }
         System.out.println("Peças reprovadas na inspeção (histórico): " + totalRejeitados);
     }
@@ -378,7 +394,6 @@ public class GerenciadorProducao {
         System.out.println("========== RELATÓRIO DE AUDITORIA ==========");
 
         System.out.println("-- Máquinas --");
-        // Utilizando a interface Auditavel explicitamente para demonstrar polimorfismo
         for (Auditavel a : maquinas) {
             System.out.println(a.gerarRelatorioDiagnostico() + sinalizarRisco(a));
         }
@@ -415,7 +430,7 @@ public class GerenciadorProducao {
 
         System.out.println("--- DIAGNÓSTICO DOS PRODUTOS ---");
         for (Produto p : produtosFabricados) {
-            System.out.println(lotePorProduto.get(p) + " | " + p.getId() + sinalizarRisco(p));
+            System.out.println(p.getLote() + " | " + p.getId() + sinalizarRisco(p));
             System.out.println("  " + p.gerarRelatorioDiagnostico());
         }
     }

@@ -189,7 +189,7 @@ public class Main {
         // Já definimos uma estratégia inicial para não dar erro se o usuário tentar fabricar direto
         gerenciador.setEstrategia(new EstrategiaLinhaDeMontagem());
 
-        /* 2. Criação Equipamentos (Agora recebem o cenário para calcular o desgaste) */
+        /* 2. Criação Equipamentos (recebem o cenário para calcular o desgaste) */
         gerenciador.registrarMaquina(new Injetora("Injetora CNC Alpha", cenarioEscolhido));
         gerenciador.registrarMaquina(new BracoEncaixotador("Braço Robótico KUKA", cenarioEscolhido));
         gerenciador.registrarMaquina(new EstacaoTestes("Estação de Diagnóstico ESI", cenarioEscolhido));
