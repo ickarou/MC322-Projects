@@ -1,0 +1,10 @@
+# Fabrica de Scanners Automotivos
+## Modelo: KTS 590
+#
+## Alunos:
+### Eduardo Fernandes Sales Pontes - 270802
+### Icaro Kwiatkowski do Amaral - 186535
+
+Nesta etapa da tarefa, importamos a estruturação de código desenvolvida nas atividades anteriores através da implementação do Gradle, que é uma ferramenta para a automação de compilação nos projetos.
+
+Além disso, com o crescimento das funcionalidades da planta industrial (incluindo diversas classes, interfaces, lógicas de gerenciamento de finanças e de estoque, cenários de operação entre outras aplicações elaboradas anteriormente), fez-se necessário tratar da documentação do projeto, como um todo, mediante o uso do javadoc. Dessa forma, buscamos padronizar as informações referentes às classes do sistema, tratando rigorosamente das excessões de funcionamento.  

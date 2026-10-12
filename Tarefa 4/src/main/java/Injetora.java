@@ -1,0 +1,49 @@
+/* Subclasse Injetora (Classe Máquina)
+ *
+ * Tarefa 3
+ *
+ * Material para a disciplina MC322 - Programação orientada a objetos
+ *
+ */
+
+public class Injetora extends Maquina {
+    
+    public Injetora(String nome, Cenario cenario) {
+        super(nome, 5000, 0.15f, 500.00f, cenario);
+    }
+
+    /* Métodos da classe principal */
+    @Override 
+    public boolean processar(Produto produto) {
+        if (!estaLigada()) {
+            System.out.println("A máquina " + getNome() + " está desligada. Ligue-a para iniciar a injeção.");
+            return false;
+        }
+
+        if (estaQuebrada()) {
+            System.out.println(getNome() + " está quebrada e não pode processar " + produto.getNome());
+            return false;
+        }
+
+        produto.processar();
+
+        if (verificarFalha()) {
+            produto.aumentarProbabilidadeFalha(0.05f * getFatorFalha());
+            System.out.println("AVISO: Ocorreu uma variação térmica no bico de injeção da " + getNome() + ". Probabilidade de defeito aumentada em " + produto.getNome());
+        } else {
+            System.out.println("Injeção de " + produto.getNome() + " realizada!");
+        }
+ 
+        produto.setStatus("Injetado com Sucesso");
+        
+        // Aplica o desgaste natural da máquina após terminar o serviço
+        aplicarDesgaste();
+        
+        return true;
+    }
+
+    @Override
+    public String getTipo() {
+        return "Máquina Injetora de Plástico ABS";
+    }
+}
