@@ -1,70 +1,65 @@
-/* Subclasse Estação de testes (Classe Máquina)
+/** Equipamento que inspeciona a qualidade das pecas apos a fabricacao.
  *
- * Tarefa 3
- *
- * última modificação: 28/09/2026
- *
- * Material para a disciplina MC322 - Programação orientada a objetos
- *
+ * @author Eduardo Pontes
+ * @author Icaro Amaral
  */
-
 public class EstacaoTestes extends Maquina {
-    
+
+    /**
+     * Cria uma estacao de testes para o cenario selecionado.
+     *
+     * @param nome identificacao do equipamento
+     * @param cenario cenario de operacao
+     */
     public EstacaoTestes(String nome, Cenario cenario) {
         super(nome, 1000, 0.05f, 200.00f, cenario);
     }
 
-    @Override 
-    public boolean processar(Produto produto) {
-        if (!estaLigada()) {
-            System.out.println("A máquina " + getNome() + " está desligada. Ligue-a para o início dos testes.");
-            return false;
+    /**
+     * Inspeciona a peca e define o resultado dos testes.
+     *
+     * @param produto peca a inspecionar
+     * @return {@code true} se a peca for aprovada pela inspecao
+     * @throws MaquinaIndisponivelException se o equipamento estiver desligado ou quebrado
+     * @throws IllegalArgumentException se o produto for nulo
+     */
+    @Override
+    public boolean processar(Produto produto) throws MaquinaIndisponivelException {
+        if (produto == null) {
+            throw new IllegalArgumentException("O produto deve ser informado.");
         }
-
-        if (estaQuebrada()) {
-            System.out.println(getNome() + " está quebrada e não pode processar " + produto.getNome());
-            return false;
-        }
-
-        // chance de rejeição baseada na qualidade do produto e das falhas acumuladas nas máquinas anteriores
-        float chanceRejeicao = (produto.getProbabilidadeFalhaAcumulada() * 0.5f) + (produto.getQualidade() * 0.2f);
         
-        // verifica se a peça física tem defeito sorteando um número aleatório
-        boolean produtoComDefeito = sortearChance(chanceRejeicao);
+        validarDisponibilidade();
 
+        float chanceRejeicao = (produto.getProbabilidadeFalhaAcumulada() * 0.5f)
+                + ((1.0f - produto.getQualidade()) * 0.2f);
+        boolean produtoComDefeito = sortearChance(Math.min(1.0f, chanceRejeicao));
         boolean maquinaFalhou = verificarFalha();
-
-        // A máquina rodou, então aplica o desgaste natural do ciclo
+        
         aplicarDesgaste();
 
-        // se maquina de teste falhar ela realiza um inspeção incorreta
         if (maquinaFalhou) {
-            System.out.println("[ERRO DE SENSOR] A " + getNome() + " desregulou e gerou uma inspeção incorreta para " + produto.getNome() + "!");
-
-            // o sensor desregulado inverte o veredito: aprova peça com defeito e reprova peça boa
+            System.out.println("ERRO DE SENSOR A " + getNome()
+                    + " desregulou e gerou uma inspecao incorreta para " + produto.getNome() + "!");
             boolean aprovadoPeloSensor = produtoComDefeito;
-            
-            if (aprovadoPeloSensor) {
-                produto.setStatus("Aprovado Indevidamente");
-            } else {
-                produto.setStatus("Reprovado Indevidamente");
-            }
+            produto.setStatus(aprovadoPeloSensor ? "Aprovado Indevidamente" : "Reprovado Indevidamente");
             return aprovadoPeloSensor;
         }
 
         if (produtoComDefeito) {
-            System.out.println("REPROVADO: A peça " + produto.getNome() + " apresentou falhas na inspeção.");
-            produto.setStatus("Reprovado na Inspeção");
+            System.out.println("REPROVADO: A peca " + produto.getNome() + " apresentou falhas na inspecao.");
+            produto.setStatus("Reprovado na Inspecao");
             return false;
         }
 
-        System.out.println("APROVADO: A peça " + produto.getNome() + " passou com 100% de sucesso nos testes!");
+        System.out.println("APROVADO: A peca " + produto.getNome() + " passou nos testes.");
         produto.setStatus("Aprovado");
         return true;
     }
 
+    /** @return tipo da maquina */
     @Override
     public String getTipo() {
-        return "Estação de Testes e Validações";
+        return "Estacao de Testes e Validacoes";
     }
 }

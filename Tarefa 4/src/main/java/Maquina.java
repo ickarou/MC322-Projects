@@ -27,40 +27,38 @@ public abstract class Maquina implements Auditavel {
     private float fatorFalha;
     private float fatorDesgaste;
 
-
     /**
-     * Inicializa os parâmetros operacionais da máquina.
-     * <p>
-     * A probabilidade de falha real e o fator de desgaste são calculados 
-     * multiplicando as bases informadas pelos multiplicadores do cenário atual.
-     * </p>
+     * Inicializa uma máquina conforme a capacidade e o cenário de operação.
      *
-     * @param nome O nome de identificação da máquina.
-     * @param capacidadeMaxima A capacidade de produção.
-     * @param probabilidadeFalhaBase A chance da máquina apresentar um erro no ciclo (0.0 a 1.0).
-     * @param custoOperacao O custo financeiro de cada operação da máquina.
-     * @param cenario O cenário ativo da fábrica que afeta o desgaste e a falha.
+     * @param nome identificação da máquina
+     * @param capacidadeMaxima capacidade máxima declarada do equipamento
+     * @param probabilidadeFalhaBase probabilidade base de falha entre zero e um
+     * @param custoOperacao custo de operação por peça
+     * @param cenario cenário que altera a falha e o desgaste
      */
-
     public Maquina(String nome, int capacidadeMaxima, float probabilidadeFalhaBase, float custoOperacao, Cenario cenario) {
         this.nome = nome;
         this.capacidadeMaxima = capacidadeMaxima;
         this.custoOperacao = custoOperacao;
         this.fatorFalha = cenario.getFatorFalha();
         this.fatorDesgaste = cenario.getFatorDesgaste();
-        this.probabilidadeFalha = probabilidadeFalhaBase * this.fatorFalha;
+        this.probabilidadeFalha = Math.min(1.0f, probabilidadeFalhaBase * fatorFalha);
         this.ligada = false;
     }
 
     /**
-     * Executa a operação principal da máquina sobre uma unidade de produto.
-     * 
-     * @param produto A peça que será submetida à máquina.
-     * @return {@code true} se o processamento obteve sucesso, {@code false} se a peça foi rejeitada.
-     * @throws MaquinaIndisponivelException se a máquina estiver quebrada ou desligada.
+     * Processa uma peça no equipamento.
+     *
+     * @param produto produto a processar
+     * @return {@code true} se a peça passou pela etapa; {@code false} se foi rejeitada
+     * @throws MaquinaIndisponivelException se a máquina estiver desligada ou quebrada
+     * @throws IllegalArgumentException se o produto for nulo
      */
     public abstract boolean processar(Produto produto);
 
+    /** Informa a categoria do equipamento.
+     * @return descrição do tipo de equipamento
+     */
     public abstract String getTipo();
 
     /**
@@ -70,10 +68,10 @@ public abstract class Maquina implements Auditavel {
      */
     public void ligar() throws MaquinaIndisponivelException {
         if(estaQuebrada()){
-            throw new MaquinaIndisponivelException("A máquina " + this.nome + " está quebrada! Enviar para a manutenção imediatamente.");
+            throw new MaquinaIndisponivelException("A maquina " + this.nome + " esta quebrada! Enviar para a manutencao imediatamente.");
         }
         this.ligada = true;
-        System.out.println("Máquina " + this.nome + " ligada, afaste-se do equipamento");
+        System.out.println("Maquina " + this.nome + " ligada, afaste-se do equipamento");
     }
 
     /**
@@ -81,20 +79,27 @@ public abstract class Maquina implements Auditavel {
      */
     public void desligar(){
         this.ligada = false;
-        System.out.println("Máquina " + this.nome + " desligada, segura para manuseio");
+        System.out.println("Maquina " + this.nome + " desligada, segura para manuseio");
     }
 
+    /** Consulta o estado de operação da máquina.
+     * @return {@code true} se o equipamento estiver ligado
+     */
     public boolean estaLigada(){
         return ligada;
     }
 
     /**
-     * Sorteia o acontecimento de um evento aleatório baseado na probabilidade informada.
-     * 
-     * @param chance A probabilidade do evento ocorrer (ex: 0.10f para 10%).
-     * @return {@code true} se o evento ocorreu no sorteio, {@code false} caso contrário.
+     * Sorteia um evento conforme a probabilidade informada.
+     *
+     * @param chance probabilidade entre zero e um
+     * @return {@code true} se o evento ocorrer
+     * @throws IllegalArgumentException se a probabilidade for inválida
      */
     protected boolean sortearChance(float chance) {
+        if (chance < 0.0f || chance > 1.0f) {
+            throw new IllegalArgumentException("A probabilidade deve estar entre zero e um.");
+        }
         return random.nextFloat() < chance;
     }
 
@@ -125,6 +130,11 @@ public abstract class Maquina implements Auditavel {
         this.saude = Math.max(0, this.saude - desgasteReal); // limite inferior de 0 para não bugar
     }
 
+    /**
+     * Verifica se o equipamento quebrou.
+     * 
+     * @return 
+     */
     public boolean estaQuebrada(){
         return this.saude <= 0;
     }
@@ -134,39 +144,70 @@ public abstract class Maquina implements Auditavel {
      */
     public void repararMaquina(){
         this.saude = 100;
-        System.out.println("A maquina " + this.nome + " passou por reparos e está a todo vapor de novo!");
+        System.out.println("A maquina " + this.nome + " passou por reparos e esta a todo vapor de novo!");
     }
 
     // Getters
+
+    /** Consulta o nome da máquina.
+     * @return nome de identificação da máquina
+     */
     public String getNome(){
         return nome;
     }
 
+    /** Consulta a saúde atual do equipamento.
+     * @return saúde atual do equipamento, de zero a cem
+     */
     public int getSaude(){
         return saude;
     }
 
+    /** Consulta o multiplicador de falhas do cenário.
+     * @return multiplicador de falhas do cenário
+     */
     protected float getFatorFalha(){
         return fatorFalha;
     }
 
+    /** Consulta o custo de operação por peça.
+     * @return custo de operação por peça
+     */
     public float getCustoOperacao(){
         return custoOperacao;
     }
 
+    /** Consulta a capacidade nominal do equipamento.
+     * @return capacidade máxima declarada para o equipamento
+     */
     public int getCapacidadeMaxima() {
         return capacidadeMaxima;
     }
     
-    // Implementação Interface Auditavel
+    /** @return relatório de diagnóstico da saúde da máquina */
     @Override 
     public String gerarRelatorioDiagnostico(){
         if (this.saude < 50){
-            return "Atenção! A saúde da maquina " + this.nome + " está em " + this.saude + " avaliar intervenção";
+            return "Atencao! A saude da maquina " + this.nome + " esta em " + this.saude + " avaliar intervencao";
         }
-        return "A saúde da máquina " + this.nome + " está em " + this.saude;
+        return "A saude da maquina " + this.nome + " esta em " + this.saude;
+    }
+
+    /**
+     * Valida se a maquina esta apta para operacao.
+     * 
+     * @throws MaquinaIndisponivelException se a maquina estiver desligada ou quebrada.
+     */
+    protected void validarDisponibilidade() {
+        if (!estaLigada()) {
+            throw new MaquinaIndisponivelException("A maquina " + getNome() + " esta desligada. Ligue-a primeiro.");
+        }
+        if (estaQuebrada()) {
+            throw new MaquinaIndisponivelException(getNome() + " esta quebrada e precisa de manutencao.");
+        }
     }
     
+    /** @return {@code true} se a saúde for igual ou inferior a trinta */
     @Override 
     public boolean precisaManutencao(){
         return this.saude <= 30;

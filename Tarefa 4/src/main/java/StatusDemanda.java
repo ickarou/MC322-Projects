@@ -1,28 +1,28 @@
-/* Enum StatusDemanda
-*
-* Tarefa 3
-*
-* última modificação: 22/09/2026
-*
-* Material para a disciplina MC322 - Programação orientada a objetos
-*
-*/
-
+/** Estados possíveis durante o ciclo de vida de uma demanda.
+ *
+ * @author Eduardo Pontes
+ * @author Icaro Amaral
+ */
 public enum StatusDemanda {
-    
-    //Constantes
-    PENDENTE ("Demanda cadastrada, mas ainda não iniciada"),
-    EM_PRODUCAO ("Demanda selecionada e em processo de fabricação"),
-    CONCLUIDA ("Demanda com todos os produtos produzidos com sucesso"),
-    CANCELADA ("Demanda cancelada por falta de orçamento ou insumos");
+    /** Demanda aberta e disponível para produção. */
+    PENDENTE("Demanda cadastrada, mas ainda nao iniciada"),
+    /** Lote em processamento na linha de produção. */
+    EM_PRODUCAO("Demanda selecionada e em processo de fabricacao"),
+    /** Todas as unidades solicitadas foram aprovadas. */
+    CONCLUIDA("Demanda com todos os produtos produzidos com sucesso"),
+    /** Demanda encerrada por decisão do sistema ou do operador. */
+    CANCELADA("Demanda cancelada");
 
-    private final String statusAtual;
+    private final String descricao;
 
-    StatusDemanda(String statusAtual){
-        this.statusAtual = statusAtual;
+    StatusDemanda(String descricao) {
+        this.descricao = descricao;
     }
 
-    public String getDescricao (){
-        return statusAtual;
+    /** Consulta a descrição do estado.
+     * @return descrição textual do estado
+     */
+    public String getDescricao() {
+        return descricao;
     }
 }

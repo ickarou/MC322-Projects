@@ -1,35 +1,63 @@
 /* Main.java
  *
- * Tarefa 3
+ * Tarefa 4
  *
- * última modificação: 28/09/2026
- *
- * Material para a disciplina MC322 - Programação orientada a objetos
+ * Material para a disciplina MC322 - Programacao orientada a objetos
  *
  */
 
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+/** Interface de terminal para operacao da fabrica de scanners automotivos.
+ *
+ * @author Eduardo Pontes
+ * @author Icaro Amaral
+ */
 public class Main {
 
-    /* Leitura de inteiros com validação de tipo e de intervalo */
+    /** A aplicacao utiliza metodos estaticos para operar o menu. */
+    private Main() {
+    }
+
+    /**
+     * Le um inteiro e repete a solicitacao ate receber um valor dentro do intervalo.
+     *
+     * @param scanner leitor de entrada do terminal
+     * @param prompt mensagem apresentada antes da leitura
+     * @param min menor valor aceito
+     * @param max maior valor aceito
+     * @return inteiro validado
+     * @throws NoSuchElementException quando a entrada e encerrada
+     */
     private static int lerInteiro(Scanner scanner, String prompt, int min, int max) {
         while (true) {
             System.out.print(prompt);
+            if (!scanner.hasNext()) {
+                throw new NoSuchElementException("A entrada foi encerrada.");
+            }
             if (scanner.hasNextInt()) {
                 int valor = scanner.nextInt();
                 if (valor >= min && valor <= max) {
                     return valor;
                 }
-                System.out.println("  [ERRO] Valor fora do intervalo (" + min + " a " + max + ").");
+                System.out.println("  !ERRO! Valor fora do intervalo (" + min + " a " + max + ").");
             } else {
-                System.out.println("  [ERRO] Entrada inválida! Digite apenas números.");
+                System.out.println("  !ERRO! Entrada invalida! Digite apenas numeros.");
                 scanner.next();
             }
         }
     }
 
-    /* Renovação da demanda: lote finalizado gera um novo, lote aberto recebe a quantidade extra */
+    /**
+     * Atualiza a demanda aberta ou cadastra outra apos o encerramento do lote atual.
+     *
+     * @param gerenciador gerenciador da planta
+     * @param demandas demandas atualmente associadas as opcoes do menu
+     * @param moldes modelos de produto disponiveis
+     * @param indice posicao do tipo de produto selecionado
+     * @param qtd quantidade adicional solicitada
+     */
     private static void atualizarDemanda(GerenciadorProducao gerenciador, Demanda[] demandas,
                                          Produto[] moldes, int indice, int qtd) {
         String tipo = moldes[indice].getTipo();
@@ -43,16 +71,24 @@ public class Main {
         }
     }
 
+    /**
+     * Exibe as opcoes de cadastro e consulta de demandas.
+     *
+     * @param scanner leitor de entrada
+     * @param gerenciador gerenciador da planta
+     * @param demandas demandas associadas as opcoes do menu
+     * @param moldes modelos de produto disponiveis
+     */
     private static void submenuDemandas(Scanner scanner, GerenciadorProducao gerenciador,
                                         Demanda[] demandas, Produto[] moldes) {
         boolean noSubmenu = true;
         while (noSubmenu) {
-            System.out.println("\n--- DEMANDAS ---");
-            System.out.println("[ 1 ] Atualizar: Carcaça Superior");
-            System.out.println("[ 2 ] Atualizar: Carcaça Inferior");
-            System.out.println("[ 3 ] Atualizar: Proteção Lateral");
-            System.out.println("[ 4 ] Listar demandas e status");
-            System.out.println("[ 0 ] Voltar");
+            System.out.println("\n!!! DEMANDAS !!!");
+            System.out.println("! 1 ! Atualizar: Carcaca Superior");
+            System.out.println("! 2 ! Atualizar: Carcaca Inferior");
+            System.out.println("! 3 ! Atualizar: Protecao Lateral");
+            System.out.println("! 4 ! Listar demandas e status");
+            System.out.println("! 0 ! Voltar");
             int opcao = lerInteiro(scanner, "Escolha: ", 0, 4);
 
             if (opcao == 0) {
@@ -67,39 +103,54 @@ public class Main {
         }
     }
 
+    /**
+     * Exibe as opcoes de producao automatica e por tipo de peca.
+     *
+     * @param scanner leitor de entrada
+     * @param gerenciador gerenciador da planta
+     * @param demandas demandas associadas as opcoes do menu
+     * @param moldes modelos de produto disponiveis
+     */
     private static void submenuProducao(Scanner scanner, GerenciadorProducao gerenciador,
                                         Demanda[] demandas, Produto[] moldes) {
         boolean noSubmenu = true;
         while (noSubmenu) {
-            System.out.println("\n--- FABRICAÇÃO ---");
-            System.out.println("[ 1 ] Processar PRÓXIMA demanda (Usa a estratégia ativa)");
-            System.out.println("[ 2 ] Forçar produção: Carcaça Superior");
-            System.out.println("[ 3 ] Forçar produção: Carcaça Inferior");
-            System.out.println("[ 4 ] Forçar produção: Proteção Lateral");
-            System.out.println("[ 0 ] Voltar");
-            int opcao = lerInteiro(scanner, "Escolha uma ação: ", 0, 4);
+            System.out.println("\n!!! FABRICACAO !!!");
+            System.out.println("! 1 ! Processar PROXIMA demanda !Usa a estrategia ativa!");
+            System.out.println("! 2 ! Forcar producao: Carcaca Superior");
+            System.out.println("! 3 ! Forcar producao: Carcaca Inferior");
+            System.out.println("! 4 ! Forcar producao: Protecao Lateral");
+            System.out.println("! 0 ! Voltar");
+            int opcao = lerInteiro(scanner, "Escolha uma acao: ", 0, 4);
 
             if (opcao == 0) {
                 noSubmenu = false;
             } else if (opcao == 1) {
-                System.out.println("\n>>> INICIANDO PRODUÇÃO AUTOMÁTICA <<<");
+                System.out.println("\n!!! INICIANDO PRODUCAO AUTOMATICA !!!");
                 gerenciador.executarProximaProducao();
             } else {
                 int indice = opcao - 2;
-                System.out.println("\n>>> INICIANDO LOTE: " + moldes[indice].getTipo().toUpperCase() + " <<<");
+                System.out.println("\n!!! INICIANDO LOTE: " + moldes[indice].getTipo().toUpperCase() + " !!!");
                 gerenciador.fabricarDemanda(moldes[indice], demandas[indice]);
             }
         }
     }
 
+    /**
+     * Exibe as consultas ao armazem e ao estoque de materia-prima.
+     *
+     * @param scanner leitor de entrada
+     * @param gerenciador gerenciador da planta
+     * @param materiaPrima material controlado no almoxarifado
+     */
     private static void submenuConsultas(Scanner scanner, GerenciadorProducao gerenciador,
                                          MateriaPrima materiaPrima) {
         boolean noSubmenu = true;
         while (noSubmenu) {
-            System.out.println("\n--- CONSULTAS ---");
-            System.out.println("[ 1 ] Ver Armazém (Produtos Finalizados)");
-            System.out.println("[ 2 ] Ver Almoxarifado (Matéria-Prima)");
-            System.out.println("[ 0 ] Voltar");
+            System.out.println("\n!!! CONSULTAS !!!");
+            System.out.println("! 1 ! Ver Armazem !Produtos Finalizados!");
+            System.out.println("! 2 ! Ver Almoxarifado !Materia-Prima!");
+            System.out.println("! 0 ! Voltar");
             int opcao = lerInteiro(scanner, "Escolha: ", 0, 2);
 
             if (opcao == 0) {
@@ -108,19 +159,25 @@ public class Main {
                 System.out.println();
                 gerenciador.exibirArmazem();
             } else {
-                System.out.println("\n--- RELATÓRIO DO ALMOXARIFADO ---");
-                System.out.println("Disponível: " + materiaPrima.getQuantidade() + " " + materiaPrima.getUnidade());
+                System.out.println("\n!!! RELATORIO DO ALMOXARIFADO !!!");
+                System.out.println("Disponivel: " + materiaPrima.getQuantidade() + " " + materiaPrima.getUnidade());
             }
         }
     }
 
+    /**
+     * Permite alterar a estrategia de selecao de demandas.
+     *
+     * @param scanner leitor de entrada
+     * @param gerenciador gerenciador da planta
+     */
     private static void submenuEstrategia(Scanner scanner, GerenciadorProducao gerenciador) {
-        System.out.println("\n--- ALTERAR ESTRATÉGIA ---");
-        System.out.println("[ 1 ] Linha de Montagem (Ordem de chegada)");
-        System.out.println("[ 2 ] Lote Crítico (Maior quantidade de peças)");
-        System.out.println("[ 3 ] Meta de Orçamento (Máximo de peças dentro do orçamento)");
-        System.out.println("[ 0 ] Voltar");
-        int opcao = lerInteiro(scanner, "Escolha a nova estratégia: ", 0, 3);
+        System.out.println("\n!!! ALTERAR ESTRATEGIA !!!");
+        System.out.println("! 1 ! Linha de Montagem !Ordem de chegada!");
+        System.out.println("! 2 ! Lote Critico !Maior quantidade de pecas!");
+        System.out.println("! 3 ! Meta de Orcamento !Maximo de pecas dentro do orcamento!");
+        System.out.println("! 0 ! Voltar");
+        int opcao = lerInteiro(scanner, "Escolha a nova estrategia: ", 0, 3);
 
         if (opcao == 1) {
             gerenciador.setEstrategia(new EstrategiaLinhaDeMontagem());
@@ -131,15 +188,21 @@ public class Main {
         }
     }
 
+    /**
+     * Exibe relatorios de auditoria e permite solicitar manutencao.
+     *
+     * @param scanner leitor de entrada
+     * @param gerenciador gerenciador da planta
+     */
     private static void submenuAuditoria(Scanner scanner, GerenciadorProducao gerenciador) {
         boolean noSubmenu = true;
         while (noSubmenu) {
-            System.out.println("\n--- AUDITORIA E MANUTENÇÃO ---");
-            System.out.println("[ 1 ] Relatório geral da planta");
-            System.out.println("[ 2 ] Detalhar máquinas");
-            System.out.println("[ 3 ] Detalhar produtos");
-            System.out.println("[ 4 ] Enviar máquinas para manutenção");
-            System.out.println("[ 0 ] Voltar");
+            System.out.println("\n!!! AUDITORIA E MANUTENCAO !!!");
+            System.out.println("! 1 ! Relatorio geral da planta!");
+            System.out.println("! 2 ! Detalhar maquinas!");
+            System.out.println("! 3 ! Detalhar produtos!");
+            System.out.println("! 4 ! Enviar maquinas para manutencao!");
+            System.out.println("! 0 ! Voltar");
             int opcao = lerInteiro(scanner, "Escolha: ", 0, 4);
 
             if (opcao == 0) {
@@ -158,117 +221,112 @@ public class Main {
         }
     }
 
+    /**
+     * Inicializa a planta e mantem o menu ativo ate o encerramento do turno.
+     *
+     * @param args argumentos de linha de comando, nao utilizados
+     */
     public static void main(String[] args) {
-
         Scanner scanner = new Scanner(System.in);
+        try {
+            System.out.println("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            System.out.println("!        FABRICA DE SCANNERS AUTOMOTIVOS ! KTS 590               !");
+            System.out.println("!      !V4.0! Gradle, Javadoc e Tratamento de Erros              !");
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            System.out.println("!  Operadores Logados: Eduardo Pontes e Icaro Amaral             !");
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 
-        /* Tela de Introdução */
-        System.out.println("\n╔════════════════════════════════════════════════════════════════╗");
-        System.out.println("║        FÁBRICA DE SCANNERS AUTOMOTIVOS - KTS 590               ║");
-        System.out.println("║      [V3.0] Estratégias de Produção e Auditoria Ativa          ║");
-        System.out.println("╠════════════════════════════════════════════════════════════════╣");
-        System.out.println("║  Operadores Logados: Eduardo Pontes e Icaro Amaral             ║");
-        System.out.println("╚════════════════════════════════════════════════════════════════╝\n");
+            System.out.println("!!! CONFIGURACAO DE TURNO !!!");
+            System.out.println("! 1 ! Cenario IDEAL !Orcamento farto, maquinas novas!");
+            System.out.println("! 2 ! Cenario APOCALIPTICO !Orcamento apertado, maquinas desgastadas!");
 
-        /* Seleção de Cenário (Obrigatório na Tarefa 3) */
-        System.out.println(">>> CONFIGURAÇÃO DE TURNO <<<");
-        System.out.println("[ 1 ] Cenário IDEAL (Orçamento farto, máquinas novas)");
-        System.out.println("[ 2 ] Cenário APOCALÍPTICO (Orçamento apertado, máquinas desgastadas)");
-
-        Cenario cenarioEscolhido = Cenario.IDEAL; // padrão
-        int esc = lerInteiro(scanner, "Escolha o cenário de operação: ", 1, 2);
-        if (esc == 2) {
-            cenarioEscolhido = Cenario.APOCALIPTICO;
-        }
-
-        /* 1. Matéria Prima e Gerenciador */
-        // O gerenciador agora recebe o cenário escolhido para definir o budget inicial
-        MateriaPrima plasticoABS = new MateriaPrima("ABS000", "Plástico ABS", 5000, "g", 0.50f);
-        GerenciadorProducao gerenciador = new GerenciadorProducao(plasticoABS, cenarioEscolhido);
-
-        // Já definimos uma estratégia inicial para não dar erro se o usuário tentar fabricar direto
-        gerenciador.setEstrategia(new EstrategiaLinhaDeMontagem());
-
-        /* 2. Criação Equipamentos (recebem o cenário para calcular o desgaste) */
-        gerenciador.registrarMaquina(new Injetora("Injetora CNC Alpha", cenarioEscolhido));
-        gerenciador.registrarMaquina(new BracoEncaixotador("Braço Robótico KUKA", cenarioEscolhido));
-        gerenciador.registrarMaquina(new EstacaoTestes("Estação de Diagnóstico ESI", cenarioEscolhido));
-
-        /* 3. Produtos Base */
-        Produto[] moldes = {
-            new CarcacaSuperior("MOLDE-TOP"),
-            new CarcacaInferior("MOLDE-BOT"),
-            new ProtecaoLateral("MOLDE-LAT")
-        };
-
-        /* 4. Demandas Iniciais */
-        Demanda[] demandas = new Demanda[moldes.length];
-        for (int i = 0; i < moldes.length; i++) {
-            demandas[i] = new Demanda(moldes[i].getTipo(), 0);
-            gerenciador.registrarDemanda(demandas[i], moldes[i]);
-        }
-
-        boolean executando = true;
-
-        while (executando) {
-            System.out.println("\n╔═════════════ PAINEL DE GERENCIAMENTO ═════════════╗");
-            System.out.println(String.format("║ CENÁRIO: %-40s ║", gerenciador.getNomeCenarioAtivo()));
-            System.out.println(String.format("║ ESTRATÉGIA: %-37s ║", gerenciador.getNomeEstrategiaAtual()));
-            gerenciador.exibirBudget();
-            System.out.println("╠═══════════════════════════════════════════════════╣");
-            System.out.println("║  [ 1 ] Demandas (Atualizar pedidos)               ║");
-            System.out.println("║  [ 2 ] Produção (Fabricar peças)                  ║");
-            System.out.println("║  [ 3 ] Consultas (Armazém e Estoque)              ║");
-            System.out.println("║  [ 4 ] Comprar Matéria-Prima                      ║");
-            System.out.println("║  [ 5 ] Alterar Estratégia de Produção             ║");
-            System.out.println("║  [ 6 ] Auditoria e Manutenção                     ║");
-            System.out.println("║  [ 0 ] Encerrar Turno                             ║");
-            System.out.println("╚═══════════════════════════════════════════════════╝");
-
-            int opcao = lerInteiro(scanner, "[SISTEMA] Selecione um menu: ", 0, 6);
-
-            switch (opcao) {
-                case 1: // SUBMENU DE DEMANDAS
-                    submenuDemandas(scanner, gerenciador, demandas, moldes);
-                    break;
-
-                case 2: // SUBMENU DE PRODUÇÃO
-                    submenuProducao(scanner, gerenciador, demandas, moldes);
-                    break;
-
-                case 3: // SUBMENU DE CONSULTAS
-                    submenuConsultas(scanner, gerenciador, plasticoABS);
-                    break;
-
-                case 4: // COMPRAR MATÉRIA PRIMA
-                    int qtdAdicionar = lerInteiro(scanner,
-                        "Quantidade de " + plasticoABS.getUnidade() + " para comprar (Custo: R$"
-                        + plasticoABS.getCustoPorUnidade() + " / " + plasticoABS.getUnidade() + "): ",
-                        1, 1000000);
-                    if (qtdAdicionar > 1000) {
-                        System.out.println("Bela compra! Com esse volume, a produção não vai parar tão cedo.");
-                    }
-                    gerenciador.comprarMateriaPrima(qtdAdicionar);
-                    break;
-
-                case 5: // SUBMENU DE ESTRATÉGIAS
-                    submenuEstrategia(scanner, gerenciador);
-                    break;
-
-                case 6: // SUBMENU DE AUDITORIA
-                    submenuAuditoria(scanner, gerenciador);
-                    break;
-
-                case 0:
-                    System.out.println("\n  [SISTEMA] Salvando dados de produção...");
-                    System.out.println("  [SISTEMA] Turno encerrado. Até logo!\n");
-                    executando = false;
-                    break;
-
-                default:
-                    System.out.println("  [ERRO] Código de operação não reconhecido.");
+            Cenario cenarioEscolhido = Cenario.IDEAL;
+            int esc = lerInteiro(scanner, "Escolha o cenario de operacao: ", 1, 2);
+            if (esc == 2) {
+                cenarioEscolhido = Cenario.APOCALIPTICO;
             }
+
+            MateriaPrima plasticoABS = new MateriaPrima("ABS000", "Plastico ABS", 5000, "g", 0.50f);
+            GerenciadorProducao gerenciador = new GerenciadorProducao(plasticoABS, cenarioEscolhido);
+            gerenciador.setEstrategia(new EstrategiaLinhaDeMontagem());
+
+            gerenciador.registrarMaquina(new Injetora("Injetora CNC Alpha", cenarioEscolhido));
+            gerenciador.registrarMaquina(new BracoEncaixotador("Braco Robotico KUKA", cenarioEscolhido));
+            gerenciador.registrarMaquina(new EstacaoTestes("Estacao de Diagnostico ESI", cenarioEscolhido));
+
+            Produto[] moldes = {
+                new CarcacaSuperior("MOLDE!TOP"),
+                new CarcacaInferior("MOLDE!BOT"),
+                new ProtecaoLateral("MOLDE!LAT")
+            };
+
+            Demanda[] demandas = new Demanda[moldes.length];
+            for (int i = 0; i < moldes.length; i++) {
+                demandas[i] = new Demanda(moldes[i].getTipo(), 0);
+                gerenciador.registrarDemanda(demandas[i], moldes[i]);
+            }
+
+            boolean executando = true;
+            while (executando) {
+                System.out.println("\n!!!!!!!!!!!!!! PAINEL DE GERENCIAMENTO !!!!!!!!!!!!!!");
+                System.out.println(String.format("! CENARIO: %-40s !", gerenciador.getNomeCenarioAtivo()));
+                System.out.println(String.format("! ESTRATEGIA: %-37s !", gerenciador.getNomeEstrategiaAtual()));
+                gerenciador.exibirBudget();
+                System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                System.out.println("!  ! 1 ! Demandas !Atualizar pedidos!               !");
+                System.out.println("!  ! 2 ! Producao !Fabricar pecas!                  !");
+                System.out.println("!  ! 3 ! Consultas !Armazem e Estoque!              !");
+                System.out.println("!  ! 4 ! Comprar Materia-Prima                      !");
+                System.out.println("!  ! 5 ! Alterar Estrategia de Producao             !");
+                System.out.println("!  ! 6 ! Auditoria e Manutencao                     !");
+                System.out.println("!  ! 0 ! Encerrar Turno                             !");
+                System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
+                int opcao = lerInteiro(scanner, "!SISTEMA! Selecione um menu: ", 0, 6);
+                try {
+                    switch (opcao) {
+                        case 1:
+                            submenuDemandas(scanner, gerenciador, demandas, moldes);
+                            break;
+                        case 2:
+                            submenuProducao(scanner, gerenciador, demandas, moldes);
+                            break;
+                        case 3:
+                            submenuConsultas(scanner, gerenciador, plasticoABS);
+                            break;
+                        case 4:
+                            int qtdAdicionar = lerInteiro(scanner,
+                                    "Quantidade de " + plasticoABS.getUnidade() + " para comprar !Custo: R$"
+                                            + plasticoABS.getCustoPorUnidade() + " / " + plasticoABS.getUnidade() + "! : ",
+                                    1, 1000000);
+                            if (qtdAdicionar > 1000) {
+                                System.out.println("Bela compra! Com esse volume, a producao nao vai parar tao cedo.");
+                            }
+                            gerenciador.comprarMateriaPrima(qtdAdicionar);
+                            break;
+                        case 5:
+                            submenuEstrategia(scanner, gerenciador);
+                            break;
+                        case 6:
+                            submenuAuditoria(scanner, gerenciador);
+                            break;
+                        case 0:
+                            System.out.println("\n  !SISTEMA! Salvando dados de producao...");
+                            System.out.println("  !SISTEMA! Turno encerrado. Ate logo!\n");
+                            executando = false;
+                            break;
+                        default:
+                            System.out.println("  !ERRO! Codigo de operacao nao reconhecido.");
+                    }
+                } catch (PlantaException | IllegalArgumentException e) {
+                    System.out.println("\n  !ERRO! " + e.getMessage());
+                    System.out.println("Voce pode escolher outra operacao no menu.");
+                }
+            }
+        } catch (NoSuchElementException e) {
+            System.out.println("\n  !SISTEMA! Entrada encerrada. Turno finalizado.");
+        } finally {
+            scanner.close();
         }
-        scanner.close();
     }
 }
