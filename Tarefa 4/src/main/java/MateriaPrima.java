@@ -40,7 +40,7 @@ public class MateriaPrima {
      *
      * @param qtdDemandada quantidade a consumir
      * @throws IllegalArgumentException se a quantidade nao for positiva
-     * @throws EstoqueInsuficienteException se o estoque nao cobrir a quantidade solicitada
+     * @throws RecursoInsuficienteException se o estoque nao cobrir a quantidade solicitada
      */
     public void consumir(int qtdDemandada) {
         if (qtdDemandada <= 0) {
@@ -58,7 +58,7 @@ public class MateriaPrima {
      *
      * @param qtdAdicionada quantidade a adicionar
      * @throws IllegalArgumentException se a quantidade nao for positiva
-     * @throws EstoqueInsuficienteException se o total ultrapassar o limite numerico
+     * @throws RecursoInsuficienteException se o total ultrapassar o limite numerico
      */
     public void adicionarEstoque(int qtdAdicionada) {
         if (qtdAdicionada <= 0) {

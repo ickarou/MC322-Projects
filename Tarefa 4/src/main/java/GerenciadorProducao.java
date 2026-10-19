@@ -143,7 +143,7 @@ public class GerenciadorProducao {
      * @throws DemandaInvalidaException se a demanda nao estiver PENDENTE ou nao houver pecas solicitadas.
      * @throws MaquinaIndisponivelException se alguma maquina da linha estiver quebrada.
      * @throws OrcamentoInsuficienteException se o budget nao cobrir o custo de operacao do lote.
-     * @throws EstoqueInsuficienteException se faltar materia-prima no almoxarifado.
+     * @throws RecursoInsuficienteException se faltar materia-prima no almoxarifado.
      */
     public void fabricarDemanda(Produto produtoRequerido, Demanda demandaRequerida) {
         if (demandaRequerida.getStatus() != StatusDemanda.PENDENTE) {
