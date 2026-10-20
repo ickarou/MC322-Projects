@@ -5,11 +5,21 @@
  * as probabilidades de falha baseadas no cenário e o estado de funcionamento 
  * (ligada/desligada) de qualquer equipamento da fábrica.
  * </p>
+ * <p>
+ * A máquina é o "Todo" da composição, de modo que, ela própria cria no construtor, as suas
+ * partes internas e controla o ciclo de vida delas. São um {@link Motor} (1:1), um
+ * {@link SensorDeTemperatura} (1:1) e um ou mais {@link Atuador} (1:N, guardados em
+ * uma lista porque a ordem identifica cada atuador). As partes nunca saem da máquina, logo,
+ * não há métodos que as devolvam, e quem usa a máquina só chama operações de alto
+ * nível, como {@link #aplicarDesgaste()} e {@link #repararMaquina()}, que ela delega.
+ * </p>
  * 
  * @author Icaro Amaral
  * @author Eduardo Pontes
  */
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public abstract class Maquina implements Auditavel {
@@ -22,21 +32,31 @@ public abstract class Maquina implements Auditavel {
     private float custoOperacao;
     private Random random = new Random();
 
-    private int saude = 100;
-
     private float fatorFalha;
     private float fatorDesgaste;
+
+    // Partes Internas
+    private final Motor motor;
+    private final SensorDeTemperatura sensor;
+    private final List<Atuador> atuadores;
 
     /**
      * Inicializa uma máquina conforme a capacidade e o cenário de operação.
      *
+     * As partes internas são criadas aqui, dentro do construtor.
+     * 
      * @param nome identificação da máquina
      * @param capacidadeMaxima capacidade máxima declarada do equipamento
      * @param probabilidadeFalhaBase probabilidade base de falha entre zero e um
      * @param custoOperacao custo de operação por peça
      * @param cenario cenário que altera a falha e o desgaste
+     * @param quantidadeAtuadores quantos atuadores a máquina possui, no mínimo um
+     * @throws IllegalArgumentException se a quantidade de atuadores for menor que um
      */
-    public Maquina(String nome, int capacidadeMaxima, float probabilidadeFalhaBase, float custoOperacao, Cenario cenario) {
+    public Maquina(String nome, int capacidadeMaxima, float probabilidadeFalhaBase, float custoOperacao, Cenario cenario, int quantidadeAtuadores) {
+        if (quantidadeAtuadores < 1) {
+            throw new IllegalArgumentException("A maquina precisa de pelo menos um atuador.");
+        }
         this.nome = nome;
         this.capacidadeMaxima = capacidadeMaxima;
         this.custoOperacao = custoOperacao;
@@ -44,6 +64,13 @@ public abstract class Maquina implements Auditavel {
         this.fatorDesgaste = cenario.getFatorDesgaste();
         this.probabilidadeFalha = Math.min(1.0f, probabilidadeFalhaBase * fatorFalha);
         this.ligada = false;
+ 
+        this.motor = new Motor();
+        this.sensor = new SensorDeTemperatura();
+        this.atuadores = new ArrayList<>();
+        for (int i = 1; i <= quantidadeAtuadores; i++) {
+            this.atuadores.add(new Atuador(i));
+        }
     }
 
     /**
@@ -104,47 +131,92 @@ public abstract class Maquina implements Auditavel {
     }
 
     /**
-     * Verifica se a máquina falhará na iteração atual, considerando o desgaste.
+     * Verifica se a máquina falhará na iteração atual, considerando o desgaste das partes.
      * <p>
-     * Quanto menor a saúde, maior o incremento sobre a probabilidade de falha base.
+     * A probabilidade base é multiplicada pelo efeito de cada parte (motor e sensor
+     * gastos aumentam a chance) e limitada a 100%.
      * </p>
      * 
      * @return {@code true} se a máquina falhou nesta etapa de processo.
      */
     protected boolean verificarFalha() {
-        float porcentagemDesgaste = (100 - this.saude)/100f; // se a saude estiver em 100 vira 0%
-        float chanceReal = this.probabilidadeFalha + (porcentagemDesgaste * probabilidadeFalha);
-        return sortearChance(chanceReal);
+        float fator = 1.0f;
+        for (ComponenteMaquina parte : listarPartes()) {
+            fator *= parte.calcularFatorDeFalha();
+        }
+        return sortearChance(Math.min(1.0f, probabilidadeFalha * fator));
     }
 
     /**
-     * Reduz aleatoriamente a saúde da máquina após cada processamento produtivo.
+     * Desgasta todas as partes após cada processamento.
      * <p>
-     * O desgaste base (0 a 3 pontos) é multiplicado pelo fator de desgaste do cenário.
-     * A saúde da máquina nunca atinge valores inferiores a 0.
+     * Cada parte sorteia o seu desgaste base (0 a 3 pontos), multiplicado pelo fator
+     * de desgaste do cenário e pela taxa própria da parte. A saúde de uma parte nunca
+     * fica abaixo de 0.
      * </p>
      */
     public void aplicarDesgaste(){
-        int desgasteBase = random.nextInt(4); // reduz a saude com um valor aleatorio entre 0 e 3
-        int desgasteReal = Math.round(desgasteBase * this.fatorDesgaste);
-        this.saude = Math.max(0, this.saude - desgasteReal); // limite inferior de 0 para não bugar
+        for (ComponenteMaquina parte : listarPartes()) {
+            parte.desgastar(fatorDesgaste);
+        }
+    }
+
+    /**
+     * Soma à peça o risco deixado pelas partes desgastadas (atuadores imprecisos).
+     * As subclasses chamam este método ao final de cada processamento.
+     *
+     * @param produto peça que acabou de ser processada
+     * @throws IllegalArgumentException se o produto for nulo
+     */
+    protected void aplicarRiscoDasPartes(Produto produto) {
+        if (produto == null) {
+            throw new IllegalArgumentException("O produto deve ser informado.");
+        }
+        float risco = 0.0f;
+        for (ComponenteMaquina parte : listarPartes()) {
+            risco += parte.calcularRiscoParaPeca();
+        }
+        if (risco > 0.0f) {
+            produto.aumentarProbabilidadeFalha(Math.min(1.0f, risco));
+        }
     }
 
     /**
      * Verifica se o equipamento quebrou.
      * 
-     * @return 
+     * @return {@code true} se alguma parte da máquina quebrou
      */
     public boolean estaQuebrada(){
-        return this.saude <= 0;
+        for (ComponenteMaquina parte : listarPartes()) {
+            if (parte.estaQuebrado()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
-     * Restaura a saúde da máquina para 100%, simulando uma intervenção técnica.
+     * Restaura a saúde de todas as partes para 100%, simulando uma intervenção técnica.
      */
     public void repararMaquina(){
-        this.saude = 100;
+        for (ComponenteMaquina parte : listarPartes()) {
+            parte.reparar();
+        }
         System.out.println("A maquina " + this.nome + " passou por reparos e esta a todo vapor de novo!");
+    }
+
+    /**
+     * Reúne as partes em uma lista nova, só para as operações que valem para todas.
+     * A lista é descartável: as partes continuam sem sair da máquina.
+     *
+     * @return lista com o motor, o sensor e os atuadores
+     */
+    private List<ComponenteMaquina> listarPartes() {
+        List<ComponenteMaquina> partes = new ArrayList<>();
+        partes.add(motor);
+        partes.add(sensor);
+        partes.addAll(atuadores);
+        return partes;
     }
 
     // Getters
@@ -156,11 +228,15 @@ public abstract class Maquina implements Auditavel {
         return nome;
     }
 
-    /** Consulta a saúde atual do equipamento.
+    /** Consulta a saúde atual do equipamento, que é a da parte mais desgastada.
      * @return saúde atual do equipamento, de zero a cem
      */
     public int getSaude(){
-        return saude;
+        int menor = 100;
+        for (ComponenteMaquina parte : listarPartes()) {
+            menor = Math.min(menor, parte.getSaude());
+        }
+        return menor;
     }
 
     /** Consulta o multiplicador de falhas do cenário.
@@ -184,13 +260,23 @@ public abstract class Maquina implements Auditavel {
         return capacidadeMaxima;
     }
     
-    /** @return relatório de diagnóstico da saúde da máquina */
+    /**
+     * Gera o diagnóstico hierárquico da máquina: uma linha com a saúde geral e, abaixo,
+     * uma linha indentada para cada parte (auditoria em cascata).
+     *
+     * @return relatório com várias linhas, separadas por quebra de linha
+     */
     @Override 
     public String gerarRelatorioDiagnostico(){
-        if (this.saude < 50){
-            return "Atencao! A saude da maquina " + this.nome + " esta em " + this.saude + " avaliar intervencao";
+        StringBuilder relatorio = new StringBuilder();
+        relatorio.append(this.nome).append(" - saude geral ").append(getSaude());
+        if (getSaude() < 50) {
+            relatorio.append(" | ATENCAO: avaliar intervencao");
         }
-        return "A saude da maquina " + this.nome + " esta em " + this.saude;
+        for (ComponenteMaquina parte : listarPartes()) {
+            relatorio.append("\n    |-- ").append(parte.gerarRelatorioDiagnostico());
+        }
+        return relatorio.toString();
     }
 
     /**
@@ -207,9 +293,9 @@ public abstract class Maquina implements Auditavel {
         }
     }
     
-    /** @return {@code true} se a saúde for igual ou inferior a trinta */
+    /** @return {@code true} se a saúde da máquina for igual ou inferior a trinta */
     @Override 
     public boolean precisaManutencao(){
-        return this.saude <= 30;
+        return getSaude() <= 30;
     }
 }

@@ -328,7 +328,7 @@ public class GerenciadorProducao {
 
     /** Exibe o orcamento disponivel. */
     public void exibirBudget() {
-        System.out.println(String.format(" || BUDGET: R$ %-38.2f ||", budget));
+        System.out.println(String.format("| BUDGET: R$ %-38.2f |", budget));
     }
 
     /**
