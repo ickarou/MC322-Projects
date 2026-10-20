@@ -28,18 +28,20 @@ public class EstacaoTestes extends Maquina {
         if (produto == null) {
             throw new IllegalArgumentException("O produto deve ser informado.");
         }
-        
+
         validarDisponibilidade();
 
+        // a qualidade e DIRETAMENTE proporcional a chance de
+        // rejeicao (criterios mais rigidos para produtos de alta qualidade).
         float chanceRejeicao = (produto.getProbabilidadeFalhaAcumulada() * 0.5f)
-                + ((1.0f - produto.getQualidade()) * 0.2f);
+                + (produto.getQualidade() * 0.2f);
         boolean produtoComDefeito = sortearChance(Math.min(1.0f, chanceRejeicao));
         boolean maquinaFalhou = verificarFalha();
-        
+
         aplicarDesgaste();
 
         if (maquinaFalhou) {
-            System.out.println("ERRO DE SENSOR A " + getNome()
+            System.out.println("[ERRO DE SENSOR] A " + getNome()
                     + " desregulou e gerou uma inspecao incorreta para " + produto.getNome() + "!");
             boolean aprovadoPeloSensor = produtoComDefeito;
             produto.setStatus(aprovadoPeloSensor ? "Aprovado Indevidamente" : "Reprovado Indevidamente");
