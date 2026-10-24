@@ -3,12 +3,11 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Agrupa as máquinas que formam o fluxo de fabricação da planta (o "Agrupador").
+ * Agrupa as máquinas que formam o fluxo de fabricação da planta.
  * <p>
  * A relação com {@link Maquina} é uma agregação: a linha mantém uma coleção de
- * máquinas, mas elas existem por conta própria e podem ser retiradas e colocadas
- * em outra linha. Já as partes internas de cada máquina continuam sendo composição
- * e nunca passam por aqui.
+ * máquinas, mas elas existem por conta própria e podem ser tiradas e colocadas
+ * em outra linha. Já as partes internas de cada máquina nunca passam por aqui.
  * </p>
  * <p>
  * A ordem em que as máquinas são adicionadas é a ordem do fluxo: toda peça passa
@@ -39,7 +38,7 @@ public class LinhaDeProducao implements Auditavel {
     }
 
     /**
-     * Adiciona uma máquina ao final do fluxo.
+     * Adiciona uma máquina no final do fluxo.
      *
      * @param maquina equipamento a ser integrado à linha
      * @throws IllegalArgumentException se a máquina for nula
