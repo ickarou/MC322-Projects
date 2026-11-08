@@ -1,3 +1,5 @@
+package br.unicamp.ic.mc322.model.maquina;
+
 /**
  * Sensor de temperatura da máquina (parte 1:1).
  * <p>

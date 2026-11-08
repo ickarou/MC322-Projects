@@ -1,3 +1,5 @@
+package br.unicamp.ic.mc322.exception;
+
 /** Indica que o orçamento disponível não cobre o custo de uma operação.
  *
  * @author Eduardo Pontes

@@ -1,3 +1,5 @@
+package br.unicamp.ic.mc322.model;
+
 /* Cenario.java
  *
  * Tarefa 5

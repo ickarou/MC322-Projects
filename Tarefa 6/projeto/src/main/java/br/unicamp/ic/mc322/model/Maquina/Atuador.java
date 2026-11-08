@@ -1,3 +1,5 @@
+package br.unicamp.ic.mc322.model.maquina;
+
 /**
  * Atuador da máquina (parte 1:N).
  * <p>

@@ -1,3 +1,5 @@
+package br.unicamp.ic.mc322.exception;
+
 /**
  * Classe de exceções base para todos os tratamentos de exceções do sistema.
  * <p>

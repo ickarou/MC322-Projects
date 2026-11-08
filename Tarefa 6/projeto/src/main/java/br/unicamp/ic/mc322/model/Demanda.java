@@ -1,3 +1,8 @@
+package br.unicamp.ic.mc322.model;
+
+import br.unicamp.ic.mc322.exception.DemandaInvalidaException;
+import br.unicamp.ic.mc322.model.produto.Produto;
+
 /**
  * Representa uma ordem de produção para um tipo específico de produto (Demanda).
  * <p>

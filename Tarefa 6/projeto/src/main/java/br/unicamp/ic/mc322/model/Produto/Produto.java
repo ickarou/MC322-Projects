@@ -1,3 +1,7 @@
+package br.unicamp.ic.mc322.model.produto;
+
+import br.unicamp.ic.mc322.model.Auditavel;
+
 /**
  * Classe base dos produtos fabricados na planta e auditados pelo sistema.
  * Cada produto define seu processamento, tempo de fabricacao e forma de criar

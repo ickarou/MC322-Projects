@@ -1,4 +1,7 @@
+package br.unicamp.ic.mc322.strategy;
 import java.util.List;
+
+import br.unicamp.ic.mc322.model.Demanda;
 
 /** Seleciona a primeira demanda elegivel, respeitando a ordem de cadastro.
  *

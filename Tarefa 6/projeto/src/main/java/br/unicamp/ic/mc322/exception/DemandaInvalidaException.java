@@ -1,3 +1,5 @@
+package br.unicamp.ic.mc322.exception;
+
 /**
  * Lançada para indicar foi realizada uma operação inválida sobre uma demanda.
  * <p>

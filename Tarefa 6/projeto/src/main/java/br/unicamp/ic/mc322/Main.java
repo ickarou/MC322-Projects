@@ -1,13 +1,23 @@
-/* Main.java
- *
- * Tarefa 5
- *
- * Material para a disciplina MC322 - Programacao orientada a objetos
- *
- */
+package br.unicamp.ic.mc322;
 
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import br.unicamp.ic.mc322.exception.PlantaException;
+import br.unicamp.ic.mc322.model.Cenario;
+import br.unicamp.ic.mc322.model.Demanda;
+import br.unicamp.ic.mc322.model.MateriaPrima;
+import br.unicamp.ic.mc322.model.StatusDemanda;
+import br.unicamp.ic.mc322.model.maquina.BracoEncaixotador;
+import br.unicamp.ic.mc322.model.maquina.EstacaoTestes;
+import br.unicamp.ic.mc322.model.maquina.Injetora;
+import br.unicamp.ic.mc322.model.produto.CarcacaInferior;
+import br.unicamp.ic.mc322.model.produto.CarcacaSuperior;
+import br.unicamp.ic.mc322.model.produto.Produto;
+import br.unicamp.ic.mc322.model.produto.ProtecaoLateral;
+import br.unicamp.ic.mc322.service.GerenciadorProducao;
+import br.unicamp.ic.mc322.strategy.EstrategiaLinhaDeMontagem;
+import br.unicamp.ic.mc322.strategy.EstrategiaLoteCritico;
+import br.unicamp.ic.mc322.strategy.EstrategiaMetaDeOrcamento;
 
 /** Interface de terminal para operacao da fabrica de scanners automotivos.
  *

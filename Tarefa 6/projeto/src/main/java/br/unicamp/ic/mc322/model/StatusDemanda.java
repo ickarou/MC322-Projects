@@ -1,3 +1,5 @@
+package br.unicamp.ic.mc322.model;
+
 /** Estados possíveis durante o ciclo de vida de uma demanda.
  *
  * @author Eduardo Pontes

@@ -1,3 +1,7 @@
+package br.unicamp.ic.mc322.model;
+
+import br.unicamp.ic.mc322.exception.RecursoInsuficienteException;
+
 /** Controla o estoque e o custo de um tipo de materia-prima.
  *
  * @author Eduardo Pontes

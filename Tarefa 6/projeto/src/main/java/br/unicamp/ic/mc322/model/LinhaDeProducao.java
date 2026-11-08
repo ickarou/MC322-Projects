@@ -1,6 +1,13 @@
+package br.unicamp.ic.mc322.model;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import br.unicamp.ic.mc322.exception.MaquinaIndisponivelException;
+import br.unicamp.ic.mc322.exception.OperacaoInvalidaException;
+import br.unicamp.ic.mc322.model.maquina.Maquina;
+import br.unicamp.ic.mc322.model.produto.Produto;
 
 /**
  * Agrupa as máquinas que formam o fluxo de fabricação da planta.

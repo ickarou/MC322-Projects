@@ -1,6 +1,12 @@
+package br.unicamp.ic.mc322.model.maquina;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import br.unicamp.ic.mc322.exception.MaquinaIndisponivelException;
+import br.unicamp.ic.mc322.model.Auditavel;
+import br.unicamp.ic.mc322.model.Cenario;
+import br.unicamp.ic.mc322.model.produto.Produto;
 
 /**
  * Representa uma máquina genérica operando na planta.

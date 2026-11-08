@@ -1,3 +1,5 @@
+package br.unicamp.ic.mc322.model.produto;
+
 /**
  * Representa a carcaça inferior, o componente base de sustentação do scanner KTS590.
  * <p>

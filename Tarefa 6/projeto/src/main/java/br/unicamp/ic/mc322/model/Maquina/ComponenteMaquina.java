@@ -1,4 +1,7 @@
+package br.unicamp.ic.mc322.model.maquina;
 import java.util.Random;
+
+import br.unicamp.ic.mc322.model.Auditavel;
 
 /**
  * Parte interna de uma {@link Maquina}.

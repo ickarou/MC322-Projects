@@ -1,3 +1,5 @@
+package br.unicamp.ic.mc322.exception;
+
 /** Indica que a planta não dispõe dos recursos necessários para uma operação.
  *
  * @author Eduardo Pontes

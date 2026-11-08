@@ -1,3 +1,7 @@
+package br.unicamp.ic.mc322.model.produto;
+
+
+
 /**
  * Representa a proteção lateral que compõe a carcaça do scanner automotivo KTS590.
  * <p>

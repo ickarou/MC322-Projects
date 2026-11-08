@@ -1,3 +1,5 @@
+package br.unicamp.ic.mc322.exception;
+
 /**
  * Lancada quando uma operacao generica nao pode ser concluida por falta de parametros.
  * <p>

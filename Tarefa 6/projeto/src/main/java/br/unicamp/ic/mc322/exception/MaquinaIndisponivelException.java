@@ -1,3 +1,5 @@
+package br.unicamp.ic.mc322.exception;
+
 /**
  * Lançada quando uma operação de produção é impedida pelo estado da máquina.
  * <p>

@@ -1,3 +1,9 @@
+package br.unicamp.ic.mc322.model.maquina;
+
+import br.unicamp.ic.mc322.exception.MaquinaIndisponivelException;
+import br.unicamp.ic.mc322.model.Cenario;
+import br.unicamp.ic.mc322.model.produto.Produto;
+
 /** Equipamento que inspeciona a qualidade das pecas apos a fabricacao.
  *
  * @author Eduardo Pontes

@@ -1,3 +1,6 @@
+package br.unicamp.ic.mc322.model.produto;
+
+
 /**
  * Representa a carcaça superior, o componente mais crítico e complexo do scanner KTS590.
  * <p>

@@ -1,5 +1,9 @@
+package br.unicamp.ic.mc322.strategy;
 import java.util.ArrayList;
 import java.util.List;
+
+import br.unicamp.ic.mc322.model.Demanda;
+import br.unicamp.ic.mc322.model.StatusDemanda;
 
 /** Define como uma demanda e escolhida para a proxima producao.
  *

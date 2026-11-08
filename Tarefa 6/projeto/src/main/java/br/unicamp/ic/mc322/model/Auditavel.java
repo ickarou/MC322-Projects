@@ -1,3 +1,5 @@
+package br.unicamp.ic.mc322.model;
+
 /** Elemento da planta que fornece informações para a auditoria.
  *
  * @author Eduardo Pontes

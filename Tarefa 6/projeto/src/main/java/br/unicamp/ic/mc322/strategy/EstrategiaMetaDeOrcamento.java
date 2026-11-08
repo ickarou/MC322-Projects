@@ -1,4 +1,7 @@
+package br.unicamp.ic.mc322.strategy;
 import java.util.List;
+
+import br.unicamp.ic.mc322.model.Demanda;
 
 /** Escolhe a maior demanda cujo custo estimado cabe no orcamento atual.
  *

@@ -1,4 +1,20 @@
+package br.unicamp.ic.mc322.service;
 import java.util.ArrayList;
+
+import br.unicamp.ic.mc322.exception.DemandaInvalidaException;
+import br.unicamp.ic.mc322.exception.MaquinaIndisponivelException;
+import br.unicamp.ic.mc322.exception.OperacaoInvalidaException;
+import br.unicamp.ic.mc322.exception.OrcamentoInsuficienteException;
+import br.unicamp.ic.mc322.exception.RecursoInsuficienteException;
+import br.unicamp.ic.mc322.model.Auditavel;
+import br.unicamp.ic.mc322.model.Cenario;
+import br.unicamp.ic.mc322.model.Demanda;
+import br.unicamp.ic.mc322.model.LinhaDeProducao;
+import br.unicamp.ic.mc322.model.MateriaPrima;
+import br.unicamp.ic.mc322.model.StatusDemanda;
+import br.unicamp.ic.mc322.model.maquina.Maquina;
+import br.unicamp.ic.mc322.model.produto.Produto;
+import br.unicamp.ic.mc322.strategy.EstrategiaProducao;
 
 /**
  * Orquestra todas as operacoes e regras de negocio da planta industrial.
