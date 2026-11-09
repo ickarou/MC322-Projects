@@ -1,0 +1,7 @@
+# Arquivos de build do Gradle
+build/
+.gradle/
+bin/
+
+# Dados gerados pela execucao da aplicacao (estado salvo da planta)
+dados/
