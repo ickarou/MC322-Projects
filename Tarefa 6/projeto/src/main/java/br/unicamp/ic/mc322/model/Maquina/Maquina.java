@@ -316,4 +316,63 @@ public abstract class Maquina implements Auditavel {
     public boolean precisaManutencao(){
         return getSaude() <= 30;
     }
+
+    /**
+     * Consulta a saúde atual do motor para persistência.
+     *
+     * @return saúde do motor (0 a 100)
+     */
+    public int getSaudeMotor() {
+        return motor.getSaude();
+    }
+
+    /**
+     * Consulta a saúde atual do sensor de temperatura para persistência.
+     *
+     * @return saúde do sensor (0 a 100)
+     */
+    public int getSaudeSensor() {
+        return sensor.getSaude();
+    }
+
+    /**
+     * Consulta a saúde atual de cada atuador na ordem de posição para persistência.
+     *
+     * @return lista imutável com a saúde de cada atuador
+     */
+    public List<Integer> getSaudeAtuadores() {
+        List<Integer> saudes = new ArrayList<>();
+        for (Atuador a : atuadores) {
+            saudes.add(a.getSaude());
+        }
+        return java.util.Collections.unmodifiableList(saudes);
+    }
+
+    /**
+     * Restaura o estado operacional e a saúde das partes internas a partir da persistência.
+     *
+     * @param ligada estado operacional da máquina
+     * @param saudeMotor saúde do motor (0 a 100)
+     * @param saudeSensor saúde do sensor (0 a 100)
+     * @param saudeAtuadores lista com a saúde de cada atuador da máquina
+     * @throws IllegalArgumentException se os dados forem incompatíveis ou resultarem em máquina quebrada ligada
+     */
+    public void restaurarEstado(boolean ligada, int saudeMotor, int saudeSensor, List<Integer> saudeAtuadores) {
+        if (saudeAtuadores == null || saudeAtuadores.size() != this.atuadores.size()) {
+            throw new IllegalArgumentException("Quantidade de atuadores incompativel com a maquina " + this.nome + ".");
+        }
+        this.motor.definirSaude(saudeMotor);
+        this.sensor.definirSaude(saudeSensor);
+        for (int i = 0; i < this.atuadores.size(); i++) {
+            Integer saudeAtuador = saudeAtuadores.get(i);
+            if (saudeAtuador == null) {
+                throw new IllegalArgumentException("Saude do atuador nao pode ser nula.");
+            }
+            this.atuadores.get(i).definirSaude(saudeAtuador);
+        }
+        if (ligada && estaQuebrada()) {
+            throw new IllegalArgumentException("Inconsistencia nos dados: maquina quebrada nao pode estar ligada.");
+        }
+        this.ligada = ligada;
+    }
 }
