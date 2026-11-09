@@ -177,4 +177,23 @@ public abstract class Produto implements Auditavel {
     public boolean precisaManutencao() {
         return probabilidadeFalhaAcumulada >= 0.2f;
     }
+
+    /**
+     * Restaura os atributos de histórico de uma peça carregada do armazém persistido.
+     *
+     * @param lote código do lote de fabricação
+     * @param status estado registrado da peça
+     * @param probabilidadeFalhaAcumulada probabilidade de falha acumulada entre 0 e 1
+     * @throws IllegalArgumentException se algum parâmetro for inválido
+     */
+    public void restaurarEstado(String lote, String status, float probabilidadeFalhaAcumulada) {
+        setLote(lote);
+        setStatus(status);
+        if (!Float.isFinite(probabilidadeFalhaAcumulada)
+                || probabilidadeFalhaAcumulada < 0.0f
+                || probabilidadeFalhaAcumulada > 1.0f) {
+            throw new IllegalArgumentException("A probabilidade de falha acumulada deve estar entre zero e um.");
+        }
+        this.probabilidadeFalhaAcumulada = probabilidadeFalhaAcumulada;
+    }
 }
