@@ -1,7 +1,11 @@
 package br.unicamp.ic.mc322;
 
+import java.nio.file.Files;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+
+import br.unicamp.ic.mc322.exception.PersistenciaException;
 import br.unicamp.ic.mc322.exception.PlantaException;
 import br.unicamp.ic.mc322.model.Cenario;
 import br.unicamp.ic.mc322.model.Demanda;
@@ -14,12 +18,14 @@ import br.unicamp.ic.mc322.model.produto.CarcacaInferior;
 import br.unicamp.ic.mc322.model.produto.CarcacaSuperior;
 import br.unicamp.ic.mc322.model.produto.Produto;
 import br.unicamp.ic.mc322.model.produto.ProtecaoLateral;
+import br.unicamp.ic.mc322.persistence.PersistenciaPlanta;
 import br.unicamp.ic.mc322.service.GerenciadorProducao;
 import br.unicamp.ic.mc322.strategy.EstrategiaLinhaDeMontagem;
 import br.unicamp.ic.mc322.strategy.EstrategiaLoteCritico;
 import br.unicamp.ic.mc322.strategy.EstrategiaMetaDeOrcamento;
 
-/** Interface de terminal para operacao da fabrica de scanners automotivos.
+/**
+ * Interface de terminal para operacao da fabrica de scanners automotivos.
  *
  * @author Eduardo Pontes
  * @author Icaro Amaral
@@ -93,6 +99,63 @@ public class Main {
         System.out.println(mensagem);
         System.out.print("Pressione ENTER para continuar...");
         scanner.nextLine();
+    }
+
+    /**
+     * Cria uma planta nova com os equipamentos, insumos e demandas iniciais padrao.
+     *
+     * @param cenarioEscolhido cenario de operacao selecionado
+     * @param moldes modelos de produto disponiveis no catalogo
+     * @return gerenciador da planta recem-configurado
+     */
+    private static GerenciadorProducao criarPlantaPadrao(Cenario cenarioEscolhido, Produto[] moldes) {
+        MateriaPrima plasticoABS = new MateriaPrima("ABS000", "Plastico ABS", 5000, "g", 0.50f);
+        GerenciadorProducao gerenciador = new GerenciadorProducao(plasticoABS, cenarioEscolhido);
+        gerenciador.setEstrategia(new EstrategiaLinhaDeMontagem());
+
+        gerenciador.registrarMaquina(new Injetora("Injetora CNC Alpha", cenarioEscolhido));
+        gerenciador.registrarMaquina(new BracoEncaixotador("Braco Robotico KUKA", cenarioEscolhido));
+        gerenciador.registrarMaquina(new EstacaoTestes("Estacao de Diagnostico ESI", cenarioEscolhido));
+
+        for (Produto molde : moldes) {
+            Demanda demandaInicial = new Demanda(molde.getTipo(), 0);
+            gerenciador.registrarDemanda(demandaInicial, molde);
+        }
+        return gerenciador;
+    }
+
+    /**
+     * Sincroniza o vetor de demandas ativas usado pelos atalhos do menu com as demandas
+     * presentes no gerenciador (apos inicializacao ou carregamento de arquivo XML).
+     *
+     * @param gerenciador gerenciador ativo da planta
+     * @param moldes modelos de produto do catalogo
+     * @return vetor de demandas associado a cada molde na ordem do menu
+     */
+    private static Demanda[] sincronizarDemandasDoMenu(GerenciadorProducao gerenciador, Produto[] moldes) {
+        Demanda[] demandasMenu = new Demanda[moldes.length];
+        List<Demanda> registradas = gerenciador.getDemandas();
+
+        for (int i = 0; i < moldes.length; i++) {
+            String tipo = moldes[i].getTipo();
+            Demanda selecionada = null;
+
+            for (Demanda d : registradas) {
+                if (d.getTipoProduto().equals(tipo)) {
+                    selecionada = d;
+                    if (d.getStatus() == StatusDemanda.PENDENTE) {
+                        break;
+                    }
+                }
+            }
+
+            if (selecionada == null) {
+                selecionada = new Demanda(tipo, 0);
+                gerenciador.registrarDemanda(selecionada, moldes[i]);
+            }
+            demandasMenu[i] = selecionada;
+        }
+        return demandasMenu;
     }
 
     /**
@@ -198,10 +261,8 @@ public class Main {
      *
      * @param scanner leitor de entrada
      * @param gerenciador gerenciador da planta
-     * @param materiaPrima material controlado no almoxarifado
      */
-    private static void submenuConsultas(Scanner scanner, GerenciadorProducao gerenciador,
-                                         MateriaPrima materiaPrima) {
+    private static void submenuConsultas(Scanner scanner, GerenciadorProducao gerenciador) {
         boolean noSubmenu = true;
         while (noSubmenu) {
             System.out.println("\n--- CONSULTAS ---");
@@ -216,6 +277,7 @@ public class Main {
                 System.out.println();
                 gerenciador.exibirArmazem();
             } else {
+                MateriaPrima materiaPrima = gerenciador.getMateriaPrima();
                 System.out.println("\n--- RELATORIO DO ALMOXARIFADO ---");
                 System.out.println("Disponivel: " + materiaPrima.getQuantidade() + " " + materiaPrima.getUnidade());
             }
@@ -313,10 +375,9 @@ public class Main {
      *
      * @param scanner leitor de entrada
      * @param gerenciador gerenciador da planta
-     * @param materiaPrima material comprado
      */
-    private static void comprarMateriaPrima(Scanner scanner, GerenciadorProducao gerenciador,
-                                            MateriaPrima materiaPrima) {
+    private static void comprarMateriaPrima(Scanner scanner, GerenciadorProducao gerenciador) {
+        MateriaPrima materiaPrima = gerenciador.getMateriaPrima();
         String unidade = materiaPrima.getUnidade();
         String prompt = String.format("Quantidade de %s para comprar (R$ %.2f por %s): ",
                 unidade, materiaPrima.getCustoPorUnidade(), unidade);
@@ -335,46 +396,55 @@ public class Main {
      */
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        PersistenciaPlanta persistencia = new PersistenciaPlanta();
+
+        Produto[] moldes = {
+            new CarcacaSuperior("MOLDE-TOP"),
+            new CarcacaInferior("MOLDE-BOT"),
+            new ProtecaoLateral("MOLDE-LAT")
+        };
+
         try {
             String bordaBanner = "+" + "=".repeat(64) + "+";
             System.out.println();
             System.out.println(bordaBanner);
             System.out.println(linhaBanner("       FABRICA DE SCANNERS AUTOMOTIVOS - KTS 590"));
-            System.out.println(linhaBanner("     [V5.0] Composicao, Linha de Producao e Auditoria"));
+            System.out.println(linhaBanner("     [V6.0] Persistencia XML, Pacotes e Testes JUnit"));
             System.out.println(bordaBanner);
             System.out.println(linhaBanner("Operadores Logados: Eduardo Pontes e Icaro Amaral"));
             System.out.println(bordaBanner);
             System.out.println();
 
-            System.out.println(">>> CONFIGURACAO DE TURNO <<<");
-            System.out.println("[ 1 ] Cenario IDEAL (orcamento farto, maquinas novas)");
-            System.out.println("[ 2 ] Cenario APOCALIPTICO (orcamento apertado, maquinas desgastadas)");
+            GerenciadorProducao gerenciador = null;
 
-            Cenario cenarioEscolhido = Cenario.IDEAL;
-            int esc = lerInteiro(scanner, "Escolha o cenario de operacao: ", 1, 2);
-            if (esc == 2) {
-                cenarioEscolhido = Cenario.APOCALIPTICO;
+            if (Files.exists(persistencia.getCaminhoArquivo())) {
+                System.out.println(">>> DADOS PERSISTIDOS ENCONTRADOS (" + persistencia.getCaminhoArquivo() + ") <<<");
+                System.out.println("[ 1 ] Carregar estado salvo anteriormente");
+                System.out.println("[ 2 ] Iniciar nova planta do zero");
+                int escolhaInicial = lerInteiro(scanner, "Escolha uma opcao: ", 1, 2);
+
+                if (escolhaInicial == 1) {
+                    try {
+                        gerenciador = persistencia.carregar();
+                        System.out.println("Estado da planta recuperado com sucesso do arquivo XML!");
+                    } catch (PersistenciaException e) {
+                        System.out.println("  [AVISO] Nao foi possivel carregar o arquivo salvo: " + e.getMessage());
+                        System.out.println("  [SISTEMA] Inicializando configuracao padrao de turno...");
+                    }
+                }
             }
 
-            MateriaPrima plasticoABS = new MateriaPrima("ABS000", "Plastico ABS", 5000, "g", 0.50f);
-            GerenciadorProducao gerenciador = new GerenciadorProducao(plasticoABS, cenarioEscolhido);
-            gerenciador.setEstrategia(new EstrategiaLinhaDeMontagem());
+            if (gerenciador == null) {
+                System.out.println("\n>>> CONFIGURACAO DE TURNO <<<");
+                System.out.println("[ 1 ] Cenario IDEAL (orcamento farto, maquinas novas)");
+                System.out.println("[ 2 ] Cenario APOCALIPTICO (orcamento apertado, maquinas desgastadas)");
 
-            gerenciador.registrarMaquina(new Injetora("Injetora CNC Alpha", cenarioEscolhido));
-            gerenciador.registrarMaquina(new BracoEncaixotador("Braco Robotico KUKA", cenarioEscolhido));
-            gerenciador.registrarMaquina(new EstacaoTestes("Estacao de Diagnostico ESI", cenarioEscolhido));
-
-            Produto[] moldes = {
-                new CarcacaSuperior("MOLDE-TOP"),
-                new CarcacaInferior("MOLDE-BOT"),
-                new ProtecaoLateral("MOLDE-LAT")
-            };
-
-            Demanda[] demandas = new Demanda[moldes.length];
-            for (int i = 0; i < moldes.length; i++) {
-                demandas[i] = new Demanda(moldes[i].getTipo(), 0);
-                gerenciador.registrarDemanda(demandas[i], moldes[i]);
+                int esc = lerInteiro(scanner, "Escolha o cenario de operacao: ", 1, 2);
+                Cenario cenarioEscolhido = (esc == 2) ? Cenario.APOCALIPTICO : Cenario.IDEAL;
+                gerenciador = criarPlantaPadrao(cenarioEscolhido, moldes);
             }
+
+            Demanda[] demandas = sincronizarDemandasDoMenu(gerenciador, moldes);
 
             boolean executando = true;
             while (executando) {
@@ -390,10 +460,12 @@ public class Main {
                 System.out.println(linhaPainel(" [ 5 ] Alterar Estrategia de Producao"));
                 System.out.println(linhaPainel(" [ 6 ] Auditoria e Manutencao"));
                 System.out.println(linhaPainel(" [ 7 ] Linha de Producao (estrutura e partes)"));
+                System.out.println(linhaPainel(" [ 8 ] Salvar Estado da Planta (XML)"));
+                System.out.println(linhaPainel(" [ 9 ] Carregar Estado da Planta (XML)"));
                 System.out.println(linhaPainel(" [ 0 ] Encerrar Turno"));
                 System.out.println("+===================================================+");
 
-                int opcao = lerInteiro(scanner, "[SISTEMA] Selecione um menu: ", 0, 7);
+                int opcao = lerInteiro(scanner, "[SISTEMA] Selecione um menu: ", 0, 9);
                 try {
                     switch (opcao) {
                         case 1:
@@ -403,10 +475,10 @@ public class Main {
                             submenuProducao(scanner, gerenciador, demandas, moldes);
                             break;
                         case 3:
-                            submenuConsultas(scanner, gerenciador, plasticoABS);
+                            submenuConsultas(scanner, gerenciador);
                             break;
                         case 4:
-                            comprarMateriaPrima(scanner, gerenciador, plasticoABS);
+                            comprarMateriaPrima(scanner, gerenciador);
                             break;
                         case 5:
                             submenuEstrategia(scanner, gerenciador);
@@ -417,8 +489,27 @@ public class Main {
                         case 7:
                             submenuLinha(scanner, gerenciador);
                             break;
+                        case 8:
+                            persistencia.salvar(gerenciador);
+                            System.out.println("  [SISTEMA] Estado da planta salvo com sucesso em: "
+                                    + persistencia.getCaminhoArquivo());
+                            break;
+                        case 9:
+                            gerenciador = persistencia.carregar();
+                            demandas = sincronizarDemandasDoMenu(gerenciador, moldes);
+                            System.out.println("  [SISTEMA] Estado da planta recarregado com sucesso de: "
+                                    + persistencia.getCaminhoArquivo());
+                            break;
                         case 0:
-                            System.out.println("\n  [SISTEMA] Salvando dados de producao...");
+                            System.out.println("\n  [SISTEMA] Salvando dados de producao em "
+                                    + persistencia.getCaminhoArquivo() + "...");
+                            try {
+                                persistencia.salvar(gerenciador);
+                                System.out.println("  [SISTEMA] Dados salvos com sucesso!");
+                            } catch (PersistenciaException e) {
+                                System.out.println("  [AVISO] Nao foi possivel salvar automaticamente ao sair: "
+                                        + e.getMessage());
+                            }
                             System.out.println("  [SISTEMA] Turno encerrado. Ate logo!\n");
                             executando = false;
                             break;
