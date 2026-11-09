@@ -223,4 +223,20 @@ public class Demanda {
         }
         this.status = StatusDemanda.CONCLUIDA;
     }
+
+    /**
+     * Restaura o status da demanda a partir do arquivo de persistência, validando invariantes.
+     *
+     * @param statusRestaurado estado recuperado do XML
+     * @throws DemandaInvalidaException se o status for nulo ou incompatível com a quantidade
+     */
+    public void restaurarStatus(StatusDemanda statusRestaurado) {
+        if (statusRestaurado == null) {
+            throw new DemandaInvalidaException("O status da demanda nao pode ser nulo.");
+        }
+        if (statusRestaurado == StatusDemanda.CONCLUIDA && this.quantidadeProdutos != 0) {
+            throw new DemandaInvalidaException("Demanda concluida nao pode possuir saldo restante de pecas.");
+        }
+        this.status = statusRestaurado;
+    }
 }
