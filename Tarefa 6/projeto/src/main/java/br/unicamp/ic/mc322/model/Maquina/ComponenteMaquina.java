@@ -157,4 +157,17 @@ public abstract class ComponenteMaquina implements Auditavel {
     public boolean precisaManutencao() {
         return getSaude() <= LIMITE_MANUTENCAO;
     }
+
+    /**
+     * Restaura a saúde do componente a partir dos dados persistidos.
+     *
+     * @param novaSaude valor de saúde entre 0 e 100
+     * @throws IllegalArgumentException se a saúde estiver fora do intervalo [0, 100]
+     */
+    public void definirSaude(float novaSaude) {
+        if (!Float.isFinite(novaSaude) || novaSaude < 0.0f || novaSaude > 100.0f) {
+            throw new IllegalArgumentException("A saude do componente deve estar entre 0 e 100.");
+        }
+        this.saude = novaSaude;
+    }
 }
