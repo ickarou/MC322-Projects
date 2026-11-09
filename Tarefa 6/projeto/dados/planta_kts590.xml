@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<planta budget="21800.0" cenario="IDEAL" contadorLotes="2" estrategia="Linha de Montagem" totalRejeitados="2">
+    <materiasPrimas>
+        <materiaPrima id="ABS000">
+            <nome>Plastico ABS</nome>
+            <quantidade>4400</quantidade>
+            <unidade>g</unidade>
+            <custoPorUnidade>0.5</custoPorUnidade>
+        </materiaPrima>
+    </materiasPrimas>
+    <linhaDeProducao nome="Linha Principal">
+        <maquina classe="Injetora" ligada="false" nome="Injetora CNC Alpha">
+            <motor saude="96"/>
+            <sensor saude="96"/>
+            <atuadores>
+                <atuador numero="1" saude="92"/>
+                <atuador numero="2" saude="94"/>
+            </atuadores>
+        </maquina>
+        <maquina classe="BracoEncaixotador" ligada="false" nome="Braco Robotico KUKA">
+            <motor saude="95"/>
+            <sensor saude="97"/>
+            <atuadores>
+                <atuador numero="1" saude="91"/>
+                <atuador numero="2" saude="90"/>
+                <atuador numero="3" saude="96"/>
+            </atuadores>
+        </maquina>
+        <maquina classe="EstacaoTestes" ligada="false" nome="Estacao de Diagnostico ESI">
+            <motor saude="92"/>
+            <sensor saude="95"/>
+            <atuadores>
+                <atuador numero="1" saude="93"/>
+                <atuador numero="2" saude="92"/>
+            </atuadores>
+        </maquina>
+    </linhaDeProducao>
+    <demandas>
+        <demanda quantidade="0" status="PENDENTE" tipoProduto="Carcaca Superior"/>
+        <demanda quantidade="0" status="PENDENTE" tipoProduto="Carcaca Inferior"/>
+        <demanda quantidade="0" status="CONCLUIDA" tipoProduto="Protecao Lateral"/>
+    </demandas>
+    <armazem>
+        <produto id="LOTE-002-MOLDE-LAT-1" lote="LOTE-002" probabilidadeFalha="0.019599993" status="Aprovado" tipo="Protecao Lateral"/>
+        <produto id="LOTE-002-MOLDE-LAT-2" lote="LOTE-002" probabilidadeFalha="0.025839988" status="Aprovado" tipo="Protecao Lateral"/>
+    </armazem>
+</planta>
