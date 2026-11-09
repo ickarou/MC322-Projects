@@ -1,5 +1,7 @@
 package br.unicamp.ic.mc322.service;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import br.unicamp.ic.mc322.exception.DemandaInvalidaException;
 import br.unicamp.ic.mc322.exception.MaquinaIndisponivelException;
@@ -582,6 +584,86 @@ public class GerenciadorProducao {
         for (Produto p : produtosFabricados) {
             System.out.println(p.getLote() + " | " + p.getId() + sinalizarRisco(p));
             System.out.println("  " + p.gerarRelatorioDiagnostico());
+        }
+    }
+
+    /* Métodos de Persistência e Testes */
+
+    /** @return orçamento disponível atual */
+    public float getBudget() {
+        return budget;
+    }
+
+    /** @return cenário operacional ativo */
+    public Cenario getCenarioAtivo() {
+        return cenarioAtivo;
+    }
+
+    /** @return objeto de controle de matéria-prima */
+    public MateriaPrima getMateriaPrima() {
+        return materiaPrima;
+    }
+
+    /** @return estratégia de produção ativa */
+    public EstrategiaProducao getEstrategiaAtual() {
+        return estrategiaAtual;
+    }
+
+    /** @return linha de produção principal */
+    public LinhaDeProducao getLinha() {
+        return linha;
+    }
+
+    /** @return visão somente leitura das demandas registradas */
+    public List<Demanda> getDemandas() {
+        return Collections.unmodifiableList(demandas);
+    }
+
+    /** @return visão somente leitura dos produtos no armazém */
+    public List<Produto> getProdutosFabricados() {
+        return Collections.unmodifiableList(produtosFabricados);
+    }
+
+    /** @return contador acumulado de lotes gerados */
+    public int getContadorLotes() {
+        return contadorLotes;
+    }
+
+    /** @return total histórico de peças reprovadas na inspeção */
+    public int getTotalRejeitados() {
+        return totalRejeitados;
+    }
+
+    /**
+     * Restaura os indicadores financeiros, contadores e histórico do armazém carregados da persistência.
+     *
+     * @param novoBudget orçamento recuperado
+     * @param contadorLotes contador de lotes recuperado
+     * @param totalRejeitados total de peças rejeitadas recuperado
+     * @param produtosRecuperados lista de peças aprovadas no armazém
+     * @throws IllegalArgumentException se algum valor numérico for negativo ou inválido
+     */
+    public void restaurarEstadoPlanta(float novoBudget, int contadorLotes, int totalRejeitados,
+                                      List<Produto> produtosRecuperados) {
+        if (!Float.isFinite(novoBudget) || novoBudget < 0.0f) {
+            throw new IllegalArgumentException("O orcamento restaurado nao pode ser negativo.");
+        }
+        if (contadorLotes < 0 || totalRejeitados < 0) {
+            throw new IllegalArgumentException("Os contadores de lotes e rejeicoes nao podem ser negativos.");
+        }
+        if (produtosRecuperados == null) {
+            throw new IllegalArgumentException("A lista de produtos recuperados nao pode ser nula.");
+        }
+        this.budget = novoBudget;
+        this.contadorLotes = contadorLotes;
+        this.totalRejeitados = totalRejeitados;
+        this.produtosFabricados.clear();
+        for (Produto p : produtosRecuperados) {
+            if (p == null) {
+                throw new IllegalArgumentException("Produto recuperado nao pode ser nulo.");
+            }
+            registrarProduto(p.criarNovaUnidade("MOLDE-" + p.getTipo().toUpperCase().replace(" ", "_")));
+            this.produtosFabricados.add(p);
         }
     }
 }
