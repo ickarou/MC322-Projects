@@ -1,6 +1,6 @@
 package br.unicamp.ic.mc322.notificacoes;
 
-import estudai.modelo.HorarioAula;
+import br.unicamp.ic.mc322.model.HorarioAula;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

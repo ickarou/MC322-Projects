@@ -1,9 +1,9 @@
 package br.unicamp.ic.mc322.model;
 
-import estudai.excecoes.DadoInvalidoException;
-import estudai.excecoes.PrazoInvalidoException;
-import estudai.persistencia.Csv;
-import estudai.persistencia.PersistivelCSV;
+import br.unicamp.ic.mc322.exceptions.DadoInvalidoException;
+import br.unicamp.ic.mc322.exceptions.PrazoInvalidoException;
+import br.unicamp.ic.mc322.persistencia.Csv;
+import br.unicamp.ic.mc322.persistencia.PersistivelCSV;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

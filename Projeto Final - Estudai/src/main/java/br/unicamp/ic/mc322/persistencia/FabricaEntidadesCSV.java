@@ -1,23 +1,23 @@
 package br.unicamp.ic.mc322.persistencia;
 
-import estudai.atividades.Atividade;
-import estudai.atividades.AtividadeAvaliativa;
-import estudai.atividades.Leitura;
-import estudai.atividades.Prova;
-import estudai.atividades.Trabalho;
-import estudai.biblioteca.Apostila;
-import estudai.biblioteca.ListaExercicios;
-import estudai.biblioteca.Livro;
-import estudai.biblioteca.MaterialBiblioteca;
-import estudai.excecoes.ArquivoCorrompidoException;
-import estudai.excecoes.EstudaiException;
-import estudai.medias.MediaAritmetica;
-import estudai.medias.MediaPersonalizada;
-import estudai.medias.MediaPonderada;
-import estudai.medias.RegraMedia;
-import estudai.modelo.Disciplina;
-import estudai.modelo.Prioridade;
-import estudai.modelo.StatusAtividade;
+import br.unicamp.ic.mc322.atividades.Atividade;
+import br.unicamp.ic.mc322.atividades.AtividadeAvaliativa;
+import br.unicamp.ic.mc322.atividades.Leitura;
+import br.unicamp.ic.mc322.atividades.Prova;
+import br.unicamp.ic.mc322.atividades.Trabalho;
+import br.unicamp.ic.mc322.biblioteca.Apostila;
+import br.unicamp.ic.mc322.biblioteca.ListaExercicios;
+import br.unicamp.ic.mc322.biblioteca.Livro;
+import br.unicamp.ic.mc322.biblioteca.MaterialBiblioteca;
+import br.unicamp.ic.mc322.exceptions.ArquivoCorrompidoException;
+import br.unicamp.ic.mc322.exceptions.EstudaiException;
+import br.unicamp.ic.mc322.medias.MediaAritmetica;
+import br.unicamp.ic.mc322.medias.MediaPersonalizada;
+import br.unicamp.ic.mc322.medias.MediaPonderada;
+import br.unicamp.ic.mc322.medias.RegraMedia;
+import br.unicamp.ic.mc322.model.Disciplina;
+import br.unicamp.ic.mc322.model.Prioridade;
+import br.unicamp.ic.mc322.model.StatusAtividade;
 
 import java.nio.file.Path;
 

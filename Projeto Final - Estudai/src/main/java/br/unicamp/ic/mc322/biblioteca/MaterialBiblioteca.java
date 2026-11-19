@@ -1,8 +1,8 @@
 package br.unicamp.ic.mc322.biblioteca;
 
-import estudai.excecoes.ArquivoPdfInvalidoException;
-import estudai.persistencia.Csv;
-import estudai.persistencia.PersistivelCSV;
+import br.unicamp.ic.mc322.exceptions.ArquivoPdfInvalidoException;
+import br.unicamp.ic.mc322.persistencia.Csv;
+import br.unicamp.ic.mc322.persistencia.PersistivelCSV;
 
 import java.awt.Desktop;
 import java.io.IOException;

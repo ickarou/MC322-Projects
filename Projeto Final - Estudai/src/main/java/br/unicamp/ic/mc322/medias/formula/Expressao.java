@@ -1,6 +1,6 @@
 package br.unicamp.ic.mc322.medias.formula;
 
-import estudai.excecoes.FormulaInvalidaException;
+import br.unicamp.ic.mc322.exceptions.FormulaInvalidaException;
 
 import java.util.Map;
 import java.util.Set;

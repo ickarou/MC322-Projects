@@ -1,6 +1,6 @@
 package br.unicamp.ic.mc322.biblioteca;
 
-import estudai.excecoes.ArquivoPdfInvalidoException;
+import br.unicamp.ic.mc322.exceptions.ArquivoPdfInvalidoException;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

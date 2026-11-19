@@ -1,6 +1,6 @@
 package br.unicamp.ic.mc322.notificacoes;
 
-import estudai.persistencia.PersistivelCSV;
+import br.unicamp.ic.mc322.persistencia.PersistivelCSV;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

@@ -1,20 +1,20 @@
 package br.unicamp.ic.mc322.persistencia;
 
-import estudai.atividades.Atividade;
-import estudai.atividades.AtividadeAvaliativa;
-import estudai.atividades.ItemChecklist;
-import estudai.atividades.Prova;
-import estudai.biblioteca.MaterialBiblioteca;
-import estudai.biblioteca.PastaBiblioteca;
-import estudai.excecoes.ArquivoCorrompidoException;
-import estudai.excecoes.EstudaiException;
-import estudai.modelo.Bonus;
-import estudai.modelo.Configuracao;
-import estudai.modelo.DiaSemana;
-import estudai.modelo.Disciplina;
-import estudai.modelo.HorarioAula;
-import estudai.modelo.RegistroFalta;
-import estudai.modelo.Semestre;
+import br.unicamp.ic.mc322.atividades.Atividade;
+import br.unicamp.ic.mc322.atividades.AtividadeAvaliativa;
+import br.unicamp.ic.mc322.atividades.ItemChecklist;
+import br.unicamp.ic.mc322.atividades.Prova;
+import br.unicamp.ic.mc322.biblioteca.MaterialBiblioteca;
+import br.unicamp.ic.mc322.biblioteca.PastaBiblioteca;
+import br.unicamp.ic.mc322.exceptions.ArquivoCorrompidoException;
+import br.unicamp.ic.mc322.exceptions.EstudaiException;
+import br.unicamp.ic.mc322.model.Bonus;
+import br.unicamp.ic.mc322.model.Configuracao;
+import br.unicamp.ic.mc322.model.DiaSemana;
+import br.unicamp.ic.mc322.model.Disciplina;
+import br.unicamp.ic.mc322.model.HorarioAula;
+import br.unicamp.ic.mc322.model.RegistroFalta;
+import br.unicamp.ic.mc322.model.Semestre;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

@@ -1,6 +1,6 @@
 package br.unicamp.ic.mc322.ordenacao;
 
-import estudai.atividades.Atividade;
+import br.unicamp.ic.mc322.atividades.Atividade;
 
 import java.util.List;
 

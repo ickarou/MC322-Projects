@@ -1,9 +1,9 @@
 package br.unicamp.ic.mc322.model;
 
-import estudai.atividades.Avaliavel;
-import estudai.excecoes.NotaInvalidaException;
-import estudai.persistencia.Csv;
-import estudai.persistencia.PersistivelCSV;
+import br.unicamp.ic.mc322.atividades.Avaliavel;
+import br.unicamp.ic.mc322.exceptions.NotaInvalidaException;
+import br.unicamp.ic.mc322.persistencia.Csv;
+import br.unicamp.ic.mc322.persistencia.PersistivelCSV;
 
 /**
  * Bônus de nota (F26). Com alvo, soma na nota daquela avaliação;

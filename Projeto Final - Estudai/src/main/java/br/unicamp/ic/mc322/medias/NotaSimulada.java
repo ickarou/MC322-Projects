@@ -1,6 +1,6 @@
 package br.unicamp.ic.mc322.medias;
 
-import estudai.atividades.Avaliavel;
+import br.unicamp.ic.mc322.atividades.Avaliavel;
 
 /**
  * Avaliação "de mentira", só para cálculo: usada para simular notas (F30)

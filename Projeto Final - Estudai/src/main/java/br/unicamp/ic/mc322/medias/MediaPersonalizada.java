@@ -1,10 +1,10 @@
 package br.unicamp.ic.mc322.medias;
 
-import estudai.atividades.Avaliavel;
-import estudai.excecoes.FormulaInvalidaException;
-import estudai.medias.formula.Expressao;
-import estudai.medias.formula.ParserDeFormula;
-import estudai.modelo.Bonus;
+import br.unicamp.ic.mc322.atividades.Avaliavel;
+import br.unicamp.ic.mc322.exceptions.FormulaInvalidaException;
+import br.unicamp.ic.mc322.medias.formula.Expressao;
+import br.unicamp.ic.mc322.medias.formula.ParserDeFormula;
+import br.unicamp.ic.mc322.model.Bonus;
 
 import java.util.HashMap;
 import java.util.List;
