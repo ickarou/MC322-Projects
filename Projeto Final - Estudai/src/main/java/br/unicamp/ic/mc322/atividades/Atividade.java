@@ -81,9 +81,11 @@ public abstract class Atividade implements PersistivelCSV, GeradorDeNotificacoes
     /**
      * F20: atualiza o status pela data. Atividade não concluída com prazo vencido fica ATRASADA;
      * as outras ficam EM_ANDAMENTO (algum progresso) ou PENDENTE.
+     * Atividade encerrada (concluída ou, nas avaliações, com nota lançada) fica sempre CONCLUIDA.
      */
     public boolean verificarAtraso(LocalDate hoje) {
         if (estaEncerrada()) {
+            status = StatusAtividade.CONCLUIDA;
             return false;
         }
         boolean atrasada = prazo.isBefore(hoje);

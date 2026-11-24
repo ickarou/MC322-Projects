@@ -37,8 +37,9 @@ public abstract class AtividadeAvaliativa extends Atividade implements Avaliavel
         this.peso = peso;
     }
 
+    /** Escrito como !(dentro do intervalo) para que NaN tambem seja recusado */
     private static void validarPeso(double peso) throws NotaInvalidaException {
-        if (peso < 0 || peso > 100) {
+        if (!(peso >= 0 && peso <= 100)) {
             throw new NotaInvalidaException("O peso deve ficar entre 0 e 100.");
         }
     }
@@ -48,15 +49,17 @@ public abstract class AtividadeAvaliativa extends Atividade implements Avaliavel
         return sigla;
     }
 
-    /** F24 */
+    /** F24: Avaliação com nota lançada já aconteceu, então passa a CONCLUIDA */
     @Override
     public void lancarNota(double nota) throws NotaInvalidaException {
-        if (nota < 0 || nota > 10) {
+        if (!(nota >= 0 && nota <= 10)) {
             throw new NotaInvalidaException("A nota deve ficar entre 0 e 10.");
         }
         this.nota = nota;
+        concluir();
     }
 
+    /** A atividade continua CONCLUIDA (ela aconteceu); para reabrir, use reabrir(). */
     @Override
     public void removerNota() {
         this.nota = null;

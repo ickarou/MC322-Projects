@@ -310,7 +310,8 @@ public class PersistenciaCSV {
         }
 
         Map<String, Atividade> atividades = new HashMap<>();
-        Map<Prova, String> substitutas = new HashMap<>();
+        // LinkedHashMap: as substitutivas são religadas na ordem do arquivo, sempre do mesmo jeito.
+        Map<Prova, String> substitutas = new LinkedHashMap<>();
         for (Linha l : ler(ATIVIDADES)) {
             Disciplina d = disciplinaDa(l, disciplinas, ATIVIDADES);
             if (d == null) {
@@ -319,20 +320,32 @@ public class PersistenciaCSV {
             try {
                 String linhaAtividade = resto(l, 2);
                 Atividade a = fabrica.criarAtividadeDeCSV(linhaAtividade, d);
-                d.adicionarAtividade(a);
-                atividades.put(a.getId(), a);
                 String siglaSub = fabrica.siglaSubstituidaDeCSV(linhaAtividade);
                 if (a instanceof Prova p && !siglaSub.isBlank()) {
+                    // A substitutiva não tem peso próprio. Zerar antes de adicionar evita que ela conte
+                    // na soma dos pesos (arquivos antigos podem ter um peso gravado para ela).
+                    p.setPeso(0);
                     substitutas.put(p, siglaSub);
                 }
+                d.adicionarAtividade(a);
+                atividades.put(a.getId(), a);
             } catch (EstudaiException | RuntimeException e) {
                 avisar(ATIVIDADES, l, e.getMessage());
             }
         }
         for (Map.Entry<Prova, String> e : substitutas.entrySet()) {
-            AtividadeAvaliativa alvo = e.getKey().getDisciplina().buscarAvaliacao(e.getValue());
-            if (alvo instanceof Prova p && p != e.getKey()) {
-                e.getKey().tornarSubstitutiva(p);
+            Prova sub = e.getKey();
+            AtividadeAvaliativa alvo = sub.getDisciplina().buscarAvaliacao(e.getValue());
+            if (!(alvo instanceof Prova p) || p == sub) {
+                avisos.add(ATIVIDADES + ": a substitutiva " + sub.getSigla() + " aponta para a prova "
+                        + e.getValue() + ", que não existe; ela foi mantida como prova comum.");
+                continue;
+            }
+            try {
+                sub.tornarSubstitutiva(p);
+            } catch (IllegalArgumentException ex) {
+                avisos.add(ATIVIDADES + ": " + ex.getMessage() + " A " + sub.getSigla()
+                        + " foi mantida como prova comum.");
             }
         }
 
