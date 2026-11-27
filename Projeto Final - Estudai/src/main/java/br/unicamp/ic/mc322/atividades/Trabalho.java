@@ -38,8 +38,8 @@ public class Trabalho extends AtividadeAvaliativa {
     }
 
     @Override
-    public String getTipoAtividade() {
-        return "TRABALHO";
+    public TipoAtividade getTipoAtividade() {
+        return TipoAtividade.TRABALHO;
     }
 
     @Override

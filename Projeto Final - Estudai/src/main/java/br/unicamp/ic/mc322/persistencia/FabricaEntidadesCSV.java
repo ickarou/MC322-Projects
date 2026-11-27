@@ -4,6 +4,7 @@ import br.unicamp.ic.mc322.atividades.Atividade;
 import br.unicamp.ic.mc322.atividades.AtividadeAvaliativa;
 import br.unicamp.ic.mc322.atividades.Leitura;
 import br.unicamp.ic.mc322.atividades.Prova;
+import br.unicamp.ic.mc322.atividades.TipoAtividade;
 import br.unicamp.ic.mc322.atividades.Trabalho;
 import br.unicamp.ic.mc322.biblioteca.Apostila;
 import br.unicamp.ic.mc322.biblioteca.ListaExercicios;
@@ -32,6 +33,7 @@ public class FabricaEntidadesCSV {
 
     /**
      * Campos: id;tipo;titulo;prazo;prioridade;status; depois os de cada tipo.
+     * Do status só importa se é CONCLUIDA (o usuário marcou como concluída); o resto é recalculado.
      * PROVA: sigla;peso;nota;conteudo;substitutiva;siglaSubstituida
      * TRABALHO: sigla;peso;nota;emGrupo;localEntrega
      * LEITURA: totalPaginas;paginasLidas
@@ -39,29 +41,25 @@ public class FabricaEntidadesCSV {
     public Atividade criarAtividadeDeCSV(String linha, Disciplina d) throws ArquivoCorrompidoException {
         String[] c = Csv.separar(linha);
         try {
-            String tipo = c[1];
+            TipoAtividade tipo = TipoAtividade.valueOf(c[1]);
             String titulo = c[2];
             java.time.LocalDate prazo = Csv.data(c[3]);
             Prioridade prio = Prioridade.valueOf(c[4]);
             StatusAtividade status = StatusAtividade.valueOf(c[5]);
-            Atividade a;
-            switch (tipo) {
-                case "PROVA" -> a = new Prova(titulo, prazo, prio, d, c[6], Double.parseDouble(c[7]), c[9]);
-                case "TRABALHO" -> a = new Trabalho(titulo, prazo, prio, d, c[6], Double.parseDouble(c[7]),
+            Atividade a = switch (tipo) {
+                case PROVA -> new Prova(titulo, prazo, prio, d, c[6], Double.parseDouble(c[7]), c[9]);
+                case TRABALHO -> new Trabalho(titulo, prazo, prio, d, c[6], Double.parseDouble(c[7]),
                         Boolean.parseBoolean(c[9]), c[10]);
-                case "LEITURA" -> a = new Leitura(titulo, prazo, prio, d, Integer.parseInt(c[6]), Integer.parseInt(c[7]));
-                default -> throw new ArquivoCorrompidoException("tipo de atividade desconhecido: " + tipo);
-            }
+                case LEITURA -> new Leitura(titulo, prazo, prio, d, Integer.parseInt(c[6]), Integer.parseInt(c[7]));
+            };
             if (a instanceof AtividadeAvaliativa av) {
                 Double nota = Csv.numeroOuNulo(c[8]);
                 if (nota != null) {
                     av.lancarNota(nota);
                 }
             }
-            a.restaurar(c[0], status);
+            a.restaurar(c[0], status == StatusAtividade.CONCLUIDA);
             return a;
-        } catch (ArquivoCorrompidoException e) {
-            throw e;
         } catch (EstudaiException | RuntimeException e) {
             throw new ArquivoCorrompidoException("atividade inválida (" + e.getMessage() + ")");
         }
@@ -70,7 +68,7 @@ public class FabricaEntidadesCSV {
     /** Sigla da prova substituída, guardada na linha de uma PROVA (vazia se não for substitutiva). */
     public String siglaSubstituidaDeCSV(String linha) {
         String[] c = Csv.separar(linha);
-        return c.length > 11 && "PROVA".equals(c[1]) && Boolean.parseBoolean(c[10]) ? c[11] : "";
+        return c.length > 11 && TipoAtividade.PROVA.name().equals(c[1]) && Boolean.parseBoolean(c[10]) ? c[11] : "";
     }
 
     /**

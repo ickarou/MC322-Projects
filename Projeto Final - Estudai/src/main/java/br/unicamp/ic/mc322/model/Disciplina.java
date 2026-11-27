@@ -3,7 +3,9 @@ package br.unicamp.ic.mc322.model;
 import br.unicamp.ic.mc322.atividades.Atividade;
 import br.unicamp.ic.mc322.atividades.AtividadeAvaliativa;
 import br.unicamp.ic.mc322.atividades.Avaliavel;
+import br.unicamp.ic.mc322.atividades.Leitura;
 import br.unicamp.ic.mc322.atividades.Prova;
+import br.unicamp.ic.mc322.atividades.Trabalho;
 import br.unicamp.ic.mc322.biblioteca.PastaBiblioteca;
 import br.unicamp.ic.mc322.exceptions.AtividadeNaoEncontradaException;
 import br.unicamp.ic.mc322.exceptions.ConflitoDeHorarioException;
@@ -138,13 +140,70 @@ public class Disciplina implements PersistivelCSV, GeradorDeNotificacoes {
 
     // ------------------------------------------------------------------ atividades
 
+    /*
+     * F12 a F14: cadastro de atividades novas. É o caminho para a interface criar atividades:
+     * confere que o prazo não está no passado e já liga a atividade à disciplina, então ela nunca
+     * fica "meio criada". O prazo também precisa cair dentro do semestre (conferido pela Atividade).
+     */
+
+    public Prova cadastrarProva(String titulo, LocalDate prazo, Prioridade prio, String sigla, double peso,
+                                String conteudo)
+            throws PrazoInvalidoException, NotaInvalidaException, DadoInvalidoException {
+        Atividade.validarPrazoNovo(prazo, LocalDate.now());
+        Prova p = new Prova(titulo, prazo, prio, this, sigla, peso, conteudo);
+        adicionarAtividade(p);
+        return p;
+    }
+
+    /** Prova substitutiva de "substituida". Não tem peso próprio: na média, usa o da prova substituída. */
+    public Prova cadastrarProvaSubstitutiva(String titulo, LocalDate prazo, Prioridade prio, String sigla,
+                                            String conteudo, Prova substituida)
+            throws PrazoInvalidoException, NotaInvalidaException, DadoInvalidoException {
+        if (substituida == null) {
+            throw new DadoInvalidoException("Escolha a prova que será substituída.");
+        }
+        Atividade.validarPrazoNovo(prazo, LocalDate.now());
+        Prova p = new Prova(titulo, prazo, prio, this, sigla, 0, conteudo);
+        try {
+            p.tornarSubstitutiva(substituida);
+        } catch (IllegalArgumentException e) {
+            throw new DadoInvalidoException(e.getMessage());
+        }
+        adicionarAtividade(p);
+        return p;
+    }
+
+    public Trabalho cadastrarTrabalho(String titulo, LocalDate prazo, Prioridade prio, String sigla, double peso,
+                                      boolean emGrupo, String localEntrega)
+            throws PrazoInvalidoException, NotaInvalidaException, DadoInvalidoException {
+        Atividade.validarPrazoNovo(prazo, LocalDate.now());
+        Trabalho t = new Trabalho(titulo, prazo, prio, this, sigla, peso, emGrupo, localEntrega);
+        adicionarAtividade(t);
+        return t;
+    }
+
+    public Leitura cadastrarLeitura(String titulo, LocalDate prazo, Prioridade prio, int totalPaginas, int paginasLidas)
+            throws PrazoInvalidoException, DadoInvalidoException {
+        Atividade.validarPrazoNovo(prazo, LocalDate.now());
+        Leitura l = new Leitura(titulo, prazo, prio, this, totalPaginas, paginasLidas);
+        try {
+            adicionarAtividade(l);
+        } catch (NotaInvalidaException e) {
+            throw new IllegalStateException("Leitura não tem peso", e);   // não acontece: só avaliações têm peso
+        }
+        return l;
+    }
+
     /**
-     * F14: liga uma atividade à disciplina. Nas avaliações, a sigla precisa ser única
-     * e a soma dos pesos não pode passar de 100.
+     * Liga uma atividade já criada à disciplina (usado pelos cadastrar... e pela persistência).
+     * Nas avaliações, a sigla precisa ser única e a soma dos pesos não pode passar de 100.
      */
     public void adicionarAtividade(Atividade a) throws NotaInvalidaException, DadoInvalidoException {
         if (a.getDisciplina() != this) {
             throw new DadoInvalidoException("A atividade pertence a outra disciplina.");
+        }
+        if (atividades.contains(a)) {
+            throw new DadoInvalidoException("A atividade já está nesta disciplina.");
         }
         if (a instanceof AtividadeAvaliativa av) {
             if (buscarAvaliacao(av.getSigla()) != null) {

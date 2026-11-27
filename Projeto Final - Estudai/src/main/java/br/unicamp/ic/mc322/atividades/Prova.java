@@ -1,5 +1,3 @@
-
-
 package br.unicamp.ic.mc322.atividades;
 
 import br.unicamp.ic.mc322.exceptions.DadoInvalidoException;
@@ -10,9 +8,10 @@ import br.unicamp.ic.mc322.model.Prioridade;
 
 import java.time.LocalDate;
 
-/** Prova. O checklist guarda os tópicos a revisar. Pode ser substitutiva de outra prova. 
- * A substitutiva não tem peso próprio (fica com 0): na média, a nota dela usa o peso da prova substituida.
-*/
+/**
+ * Prova. O checklist guarda os tópicos a revisar. Pode ser substitutiva de outra prova.
+ * A substitutiva não tem peso próprio (fica com 0): na média, a nota dela usa o peso da prova substituída.
+ */
 public class Prova extends AtividadeAvaliativa {
     private String conteudo;
     private Prova provaSubstituida;
@@ -23,9 +22,10 @@ public class Prova extends AtividadeAvaliativa {
         this.conteudo = conteudo == null ? "" : conteudo.trim();
     }
 
-    /** Marca esta prova como substitutiva de "p" e zera o peso dela. Com null, deixa de ser substitutiva
-     *  (o peso continua 0 até ser definido com setPeso).
-     *  Recusa ciclos e cadeias: "p" não pode ser substitutiva, ninguém pode estar substituindo esta prova 
+    /**
+     * Marca esta prova como substitutiva de "p" e zera o peso dela. Com null, deixa de ser
+     * substitutiva (o peso continua 0 até ser definido com setPeso).
+     * Recusa ciclos e cadeias: "p" não pode ser substitutiva, ninguém pode estar substituindo esta prova
      * e "p" não pode já ter outra substitutiva.
      */
     public void tornarSubstitutiva(Prova p) {
@@ -36,16 +36,16 @@ public class Prova extends AtividadeAvaliativa {
         if (p == this) {
             throw new IllegalArgumentException("Uma prova não pode substituir a si mesma.");
         }
-        if (p.getDisciplina() != disciplina) {
+        if (p.getDisciplina() != getDisciplina()) {
             throw new IllegalArgumentException("A prova substituída precisa ser da mesma disciplina.");
         }
         if (p.isSubstitutiva()) {
             throw new IllegalArgumentException("A prova " + p.getSigla() + " já é substitutiva e não pode ser substituída.");
         }
-        for (Atividade a : disciplina.getAtividades()) {
+        for (Atividade a : getDisciplina().getAtividades()) {
             if (a instanceof Prova outra && outra != this) {
                 if (outra.provaSubstituida == this) {
-                    throw new IllegalArgumentException("A prova " + sigla + " já é substituída pela "
+                    throw new IllegalArgumentException("A prova " + getSigla() + " já é substituída pela "
                             + outra.getSigla() + " e não pode ser substitutiva.");
                 }
                 if (outra.provaSubstituida == p) {
@@ -55,11 +55,15 @@ public class Prova extends AtividadeAvaliativa {
             }
         }
         this.provaSubstituida = p;
-        this.peso = 0;
+        zerarPeso();
     }
 
     public boolean isSubstitutiva() {
         return provaSubstituida != null;
+    }
+
+    public Prova getProvaSubstituida() {
+        return provaSubstituida;
     }
 
     /** A substitutiva usa o peso da prova substituída, então o peso próprio dela precisa ser 0. */
@@ -71,10 +75,6 @@ public class Prova extends AtividadeAvaliativa {
         super.setPeso(peso);
     }
 
-    public Prova getProvaSubstituida() {
-        return provaSubstituida;
-    }
-
     public String getConteudo() {
         return conteudo;
     }
@@ -84,8 +84,8 @@ public class Prova extends AtividadeAvaliativa {
     }
 
     @Override
-    public String getTipoAtividade() {
-        return "PROVA";
+    public TipoAtividade getTipoAtividade() {
+        return TipoAtividade.PROVA;
     }
 
     @Override
@@ -93,4 +93,3 @@ public class Prova extends AtividadeAvaliativa {
         return camposAvaliacao(conteudo, isSubstitutiva(), provaSubstituida == null ? "" : provaSubstituida.getSigla());
     }
 }
-

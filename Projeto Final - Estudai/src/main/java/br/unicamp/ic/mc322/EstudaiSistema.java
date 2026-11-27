@@ -200,21 +200,17 @@ public class EstudaiSistema {
 
     // =================================================================== atividades
 
-    /** Todas as atividades do semestre ativo, com status atualizado pela data e já ordenadas (F19 a F21). */
+    /** Todas as atividades do semestre ativo, já ordenadas (F19 a F21). O status de cada uma é calculado na hora. */
     public List<Atividade> listarAtividadesSemestreAtivo(boolean incluirTrancadas) {
         List<Atividade> lista = new ArrayList<>();
         if (semestreAtivo == null) {
             return lista;
         }
-        LocalDate hoje = LocalDate.now();
         for (Disciplina d : semestreAtivo.getDisciplinas()) {
             if (d.isTrancada() && !incluirTrancadas) {
                 continue;
             }
-            for (Atividade a : d.getAtividades()) {
-                a.verificarAtraso(hoje);
-                lista.add(a);
-            }
+            lista.addAll(d.getAtividades());
         }
         return ordenadorAtividades.ordenar(lista);
     }
@@ -223,6 +219,7 @@ public class EstudaiSistema {
     public List<Atividade> filtrarAtividades(Disciplina disc, Class<? extends Atividade> tipo, StatusAtividade st,
                                              String busca, boolean incluirTrancadas) {
         String termo = busca == null ? "" : busca.trim().toLowerCase(Locale.ROOT);
+        LocalDate hoje = LocalDate.now();
         List<Atividade> resultado = new ArrayList<>();
         for (Atividade a : listarAtividadesSemestreAtivo(incluirTrancadas)) {
             if (disc != null && a.getDisciplina() != disc) {
@@ -231,7 +228,7 @@ public class EstudaiSistema {
             if (tipo != null && !tipo.isInstance(a)) {
                 continue;
             }
-            if (st != null && a.getStatus() != st) {
+            if (st != null && a.getStatus(hoje) != st) {
                 continue;
             }
             if (!termo.isEmpty() && !a.getTitulo().toLowerCase(Locale.ROOT).contains(termo)) {

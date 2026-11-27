@@ -6,10 +6,14 @@ import br.unicamp.ic.mc322.persistencia.PersistivelCSV;
 
 /** Uma etapa de trabalho ou um tópico de prova (F18). */
 public class ItemChecklist implements PersistivelCSV {
-    private final String descricao;
+    private String descricao;
     private boolean concluido;
 
     public ItemChecklist(String descricao) throws DadoInvalidoException {
+        setDescricao(descricao);
+    }
+
+    public final void setDescricao(String descricao) throws DadoInvalidoException {
         if (descricao == null || descricao.isBlank()) {
             throw new DadoInvalidoException("Descreva o item do checklist.");
         }

@@ -5,62 +5,62 @@ import br.unicamp.ic.mc322.exceptions.NotaInvalidaException;
 import br.unicamp.ic.mc322.exceptions.PrazoInvalidoException;
 import br.unicamp.ic.mc322.model.Disciplina;
 import br.unicamp.ic.mc322.model.Prioridade;
-import br.unicamp.ic.mc322.model.StatusAtividade;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 /**
  * Atividade que recebe nota: guarda sigla, peso, nota e o checklist (etapas ou tópicos).
- * O progresso é a fração do checklist concluída.
+ * O progresso é a fração do checklist concluída. Com nota lançada, a avaliação está encerrada.
  */
 public abstract class AtividadeAvaliativa extends Atividade implements Avaliavel {
     /** A sigla é usada nas fórmulas: começa com letra e só tem letras, números ou _. */
     private static final Pattern FORMATO_SIGLA = Pattern.compile("[A-Za-z][A-Za-z0-9_]*");
 
-    protected String sigla;
-    protected double peso;
-    protected Double nota;
-    protected final List<ItemChecklist> checklist = new ArrayList<>();
+    private final String sigla;
+    private double peso;
+    private Double nota;
+    private final List<ItemChecklist> checklist = new ArrayList<>();
 
-    public AtividadeAvaliativa(String titulo, LocalDate prazo, Prioridade prio, Disciplina d, String sigla, double peso)
+    protected AtividadeAvaliativa(String titulo, LocalDate prazo, Prioridade prio, Disciplina d, String sigla,
+                                  double peso)
             throws PrazoInvalidoException, NotaInvalidaException, DadoInvalidoException {
         super(titulo, prazo, prio, d);
         if (sigla == null || !FORMATO_SIGLA.matcher(sigla.trim()).matches()) {
             throw new DadoInvalidoException("Sigla inválida: use letras e números, começando por letra (ex.: P1, T2).");
         }
         validarPeso(peso);
-        this.sigla = sigla.trim().toUpperCase();
+        this.sigla = sigla.trim().toUpperCase(Locale.ROOT);
         this.peso = peso;
     }
 
-    /** Escrito como !(dentro do intervalo) para que NaN tambem seja recusado */
+    /** Escrito como !(dentro do intervalo) para que NaN também seja recusado. */
     private static void validarPeso(double peso) throws NotaInvalidaException {
         if (!(peso >= 0 && peso <= 100)) {
             throw new NotaInvalidaException("O peso deve ficar entre 0 e 100.");
         }
     }
 
+    // ------------------------------------------------------------------ nota e peso
+
     @Override
     public String getSigla() {
         return sigla;
     }
 
-    /** F24: Avaliação com nota lançada já aconteceu, então passa a CONCLUIDA */
-    @Override
+    /** F24. Com a nota lançada, a avaliação passa a CONCLUIDA. */
     public void lancarNota(double nota) throws NotaInvalidaException {
         if (!(nota >= 0 && nota <= 10)) {
             throw new NotaInvalidaException("A nota deve ficar entre 0 e 10.");
         }
         this.nota = nota;
-        concluir();
     }
 
-    /** A atividade continua CONCLUIDA (ela aconteceu); para reabrir, use reabrir(). */
-    @Override
+    /** Sem a nota, o status volta a ser calculado pelo prazo, a menos que o usuário tenha concluído a atividade. */
     public void removerNota() {
         this.nota = null;
     }
@@ -76,74 +76,82 @@ public abstract class AtividadeAvaliativa extends Atividade implements Avaliavel
     }
 
     /** F14: a soma dos pesos da disciplina não pode passar de 100. */
-    @Override
     public void setPeso(double peso) throws NotaInvalidaException {
         validarPeso(peso);
-        if (disciplina.getAtividades().contains(this) && disciplina.somaPesos(this) + peso > 100.0 + 1e-9) {
+        Disciplina d = getDisciplina();
+        if (d.getAtividades().contains(this) && d.somaPesos(this) + peso > 100.0 + 1e-9) {
             throw new NotaInvalidaException("A soma dos pesos das avaliações passaria de 100.");
         }
         this.peso = peso;
     }
 
-    @Override
-    public boolean possuiNotaLancada() {
-        return nota != null;
+    /** Para a Prova substitutiva, cujo peso é sempre 0. Zerar nunca quebra a soma dos pesos. */
+    protected final void zerarPeso() {
+        this.peso = 0;
     }
 
     /** Avaliação com nota lançada já aconteceu: não conta como atrasada. */
     @Override
-    protected boolean estaEncerrada() {
+    public boolean estaEncerrada() {
         return super.estaEncerrada() || nota != null;
     }
 
-    // ---- checklist (F18) ----
+    // ------------------------------------------------------------------ checklist (F18)
 
     public void adicionarItem(String descricao) throws DadoInvalidoException {
         checklist.add(new ItemChecklist(descricao));
-        verificarAtraso(LocalDate.now());
     }
 
     /** Usado pela persistência. */
     public void adicionarItem(ItemChecklist item) {
+        if (item == null) {
+            throw new IllegalArgumentException("O item do checklist não pode ser nulo.");
+        }
         checklist.add(item);
     }
 
-    public void removerItem(int indice) {
-        checklist.remove(indice);
-        verificarAtraso(LocalDate.now());
+    public void removerItem(int indice) throws DadoInvalidoException {
+        checklist.remove(item(indice));
     }
 
-    public void alternarItem(int indice, boolean concluido) {
-        ItemChecklist item = checklist.get(indice);
+    public void alternarItem(int indice, boolean concluido) throws DadoInvalidoException {
+        ItemChecklist item = item(indice);
         if (concluido) {
             item.marcar();
         } else {
             item.desmarcar();
         }
-        verificarAtraso(LocalDate.now());
+    }
+
+    public void editarItem(int indice, String descricao) throws DadoInvalidoException {
+        item(indice).setDescricao(descricao);
+    }
+
+    private ItemChecklist item(int indice) throws DadoInvalidoException {
+        if (indice < 0 || indice >= checklist.size()) {
+            throw new DadoInvalidoException("Item " + indice + " não existe no checklist.");
+        }
+        return checklist.get(indice);
     }
 
     public List<ItemChecklist> getChecklist() {
         return Collections.unmodifiableList(checklist);
     }
 
-    /** F19: itens concluídos ÷ total. Sem itens, vale 1 se a atividade foi concluída e 0 se não. */
+    /** Itens concluídos ÷ total; sem itens, 0 (o progresso vira 100% quando a avaliação é encerrada). */
     @Override
-    public double calcularProgresso() {
+    protected double calcularProgressoParcial() {
         if (checklist.isEmpty()) {
-            return status == StatusAtividade.CONCLUIDA ? 1 : 0;
+            return 0;
         }
         long feitos = checklist.stream().filter(ItemChecklist::isConcluido).count();
         return (double) feitos / checklist.size();
     }
 
+    // ------------------------------------------------------------------ persistência
+
     /** Campos comuns às avaliações; as subclasses acrescentam os seus. */
     protected Object[] camposAvaliacao(Object... extras) {
-        Object[] base = {sigla, peso, nota};
-        Object[] todos = new Object[base.length + extras.length];
-        System.arraycopy(base, 0, todos, 0, base.length);
-        System.arraycopy(extras, 0, todos, base.length, extras.length);
-        return todos;
+        return concatenar(new Object[]{sigla, peso, nota}, extras);
     }
 }
-

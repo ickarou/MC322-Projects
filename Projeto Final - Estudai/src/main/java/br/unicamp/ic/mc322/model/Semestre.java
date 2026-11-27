@@ -1,5 +1,6 @@
 package br.unicamp.ic.mc322.model;
 
+import br.unicamp.ic.mc322.atividades.Atividade;
 import br.unicamp.ic.mc322.exceptions.DadoInvalidoException;
 import br.unicamp.ic.mc322.exceptions.PrazoInvalidoException;
 import br.unicamp.ic.mc322.persistencia.Csv;
@@ -163,7 +164,7 @@ public class Semestre implements PersistivelCSV {
             }
             total += d.getAtividades().size();
             concluidas += (int) d.getAtividades().stream()
-                    .filter(a -> a.getStatus() == StatusAtividade.CONCLUIDA).count();
+                    .filter(Atividade::estaEncerrada).count();
         }
         return total == 0 ? 0 : (double) concluidas / total;
     }
