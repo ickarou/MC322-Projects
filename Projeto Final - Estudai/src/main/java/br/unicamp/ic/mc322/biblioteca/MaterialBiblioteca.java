@@ -6,46 +6,37 @@ import br.unicamp.ic.mc322.persistencia.PersistivelCSV;
 
 import java.awt.Desktop;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.UUID;
 
-/** Base dos materiais da biblioteca (F47 a F50). O PDF é copiado para a pasta do programa. */
+/**
+ * Base dos materiais da biblioteca (F47 a F50). O PDF é copiado para a pasta do programa.
+ * No CSV vai só o nome do arquivo da cópia: o caminho completo vem da pasta onde o material está,
+ * então a pasta de dados pode ser movida sem perder os PDFs.
+ */
 public abstract class MaterialBiblioteca implements PersistivelCSV {
-    private static final byte[] ASSINATURA_PDF = "%PDF".getBytes(StandardCharsets.US_ASCII);
+    private String id;
+    private String titulo;
+    private Path caminhoArquivoOriginal;
+    private Path caminhoArquivoCopia;
+    private LocalDate dataAdicao;
 
-    protected String id;
-    protected String titulo;
-    protected Path caminhoArquivoOriginal;
-    protected Path caminhoArquivoCopia;
-    protected LocalDate dataAdicao;
-
-    public MaterialBiblioteca(String titulo, Path caminhoCopia) {
+    protected MaterialBiblioteca(String titulo, Path caminhoCopia) {
         this.id = UUID.randomUUID().toString();
         this.titulo = titulo == null || titulo.isBlank() ? caminhoCopia.getFileName().toString() : titulo.trim();
         this.caminhoArquivoCopia = caminhoCopia;
         this.dataAdicao = LocalDate.now();
     }
 
-    /** Confere se o arquivo existe, termina em .pdf e começa com a assinatura %PDF. */
+    /** Confere se o arquivo existe e tem a extensão .pdf. */
     public static void validarPdf(Path arquivo) throws ArquivoPdfInvalidoException {
         if (arquivo == null || !Files.isRegularFile(arquivo)) {
             throw new ArquivoPdfInvalidoException("Arquivo não encontrado: " + arquivo);
         }
         if (!arquivo.getFileName().toString().toLowerCase().endsWith(".pdf")) {
             throw new ArquivoPdfInvalidoException("O arquivo precisa ter a extensão .pdf.");
-        }
-        try (InputStream in = Files.newInputStream(arquivo)) {
-            byte[] inicio = in.readNBytes(ASSINATURA_PDF.length);
-            if (!Arrays.equals(inicio, ASSINATURA_PDF)) {
-                throw new ArquivoPdfInvalidoException("O arquivo " + arquivo.getFileName() + " não é um PDF válido.");
-            }
-        } catch (IOException e) {
-            throw new ArquivoPdfInvalidoException("Não foi possível ler " + arquivo.getFileName() + ".");
         }
     }
 
@@ -66,19 +57,21 @@ public abstract class MaterialBiblioteca implements PersistivelCSV {
         try {
             Files.deleteIfExists(caminhoArquivoCopia);
         } catch (IOException e) {
-            throw new ArquivoPdfInvalidoException("Não foi possível apagar a cópia de " + titulo + ".");
+            throw new ArquivoPdfInvalidoException("Não foi possível apagar a cópia de " + titulo
+                    + ". Se o PDF estiver aberto em outro programa, feche-o e tente de novo.");
         }
     }
 
     public abstract String getDescricaoDetalhada();
 
-    public abstract String getTipoMaterial();
+    public abstract TipoMaterial getTipoMaterial();
 
     protected abstract Object[] camposEspecificos();
 
     @Override
     public final String toCSV() {
-        Object[] base = {id, getTipoMaterial(), titulo, caminhoArquivoCopia, caminhoArquivoOriginal, dataAdicao};
+        Object[] base = {id, getTipoMaterial().name(), titulo, caminhoArquivoCopia.getFileName(), caminhoArquivoOriginal,
+                dataAdicao};
         Object[] extra = camposEspecificos();
         Object[] todos = new Object[base.length + extra.length];
         System.arraycopy(base, 0, todos, 0, base.length);
@@ -94,8 +87,18 @@ public abstract class MaterialBiblioteca implements PersistivelCSV {
         return titulo;
     }
 
+    /** Título vazio volta a ser o nome do arquivo. */
+    public void setTitulo(String titulo) {
+        this.titulo = titulo == null || titulo.isBlank() ? caminhoArquivoCopia.getFileName().toString() : titulo.trim();
+    }
+
     public Path getCaminhoArquivoCopia() {
         return caminhoArquivoCopia;
+    }
+
+    /** Usado pela PastaBiblioteca depois de mover a cópia para outra pasta. */
+    void atualizarCaminhoCopia(Path novo) {
+        this.caminhoArquivoCopia = novo;
     }
 
     public Path getCaminhoArquivoOriginal() {

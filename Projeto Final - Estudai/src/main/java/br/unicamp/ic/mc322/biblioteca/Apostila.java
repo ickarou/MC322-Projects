@@ -12,12 +12,12 @@ public class Apostila extends MaterialBiblioteca {
 
     @Override
     public String getDescricaoDetalhada() {
-        return topicoReferencia.isEmpty() ? titulo : titulo + " – " + topicoReferencia;
+        return topicoReferencia.isEmpty() ? getTitulo() : getTitulo() + " – " + topicoReferencia;
     }
 
     @Override
-    public String getTipoMaterial() {
-        return "APOSTILA";
+    public TipoMaterial getTipoMaterial() {
+        return TipoMaterial.APOSTILA;
     }
 
     public String getTopicoReferencia() {

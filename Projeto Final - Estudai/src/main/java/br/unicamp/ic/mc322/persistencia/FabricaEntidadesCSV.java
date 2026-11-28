@@ -10,6 +10,7 @@ import br.unicamp.ic.mc322.biblioteca.Apostila;
 import br.unicamp.ic.mc322.biblioteca.ListaExercicios;
 import br.unicamp.ic.mc322.biblioteca.Livro;
 import br.unicamp.ic.mc322.biblioteca.MaterialBiblioteca;
+import br.unicamp.ic.mc322.biblioteca.TipoMaterial;
 import br.unicamp.ic.mc322.exceptions.ArquivoCorrompidoException;
 import br.unicamp.ic.mc322.exceptions.EstudaiException;
 import br.unicamp.ic.mc322.medias.MediaAritmetica;
@@ -74,24 +75,24 @@ public class FabricaEntidadesCSV {
     /**
      * Campos: id;tipo;titulo;copia;original;dataAdicao; depois os de cada tipo.
      * LIVRO: autor;edicao — APOSTILA: topico — LISTA: numero;gabarito
+     *
+     * "copia" é o nome do arquivo dentro da pasta do material, que fica em "diretorioPasta".
+     * Arquivos gravados por versões antigas têm o caminho completo: só o nome do arquivo é usado.
      */
-    public MaterialBiblioteca criarMaterialDeCSV(String linha) throws ArquivoCorrompidoException {
+    public MaterialBiblioteca criarMaterialDeCSV(String linha, Path diretorioPasta) throws ArquivoCorrompidoException {
         String[] c = Csv.separar(linha);
         try {
-            Path copia = Path.of(c[3]);
-            MaterialBiblioteca m = switch (c[1]) {
-                case "LIVRO" -> new Livro(c[2], copia, c[6], Integer.parseInt(c[7]));
-                case "APOSTILA" -> new Apostila(c[2], copia, c[6]);
-                case "LISTA" -> new ListaExercicios(c[2], copia, Integer.parseInt(c[6]), Boolean.parseBoolean(c[7]));
-                default -> throw new ArquivoCorrompidoException("tipo de material desconhecido: " + c[1]);
+            Path copia = diretorioPasta.resolve(Path.of(c[3]).getFileName());
+            MaterialBiblioteca m = switch (TipoMaterial.valueOf(c[1])) {
+                case LIVRO -> new Livro(c[2], copia, c[6], Integer.parseInt(c[7]));
+                case APOSTILA -> new Apostila(c[2], copia, c[6]);
+                case LISTA -> new ListaExercicios(c[2], copia, Integer.parseInt(c[6]), Boolean.parseBoolean(c[7]));
             };
             if (!c[4].isBlank()) {
                 m.setCaminhoArquivoOriginal(Path.of(c[4]));
             }
             m.restaurar(c[0], Csv.data(c[5]));
             return m;
-        } catch (ArquivoCorrompidoException e) {
-            throw e;
         } catch (RuntimeException e) {
             throw new ArquivoCorrompidoException("material inválido (" + e.getMessage() + ")");
         }

@@ -441,8 +441,9 @@ public class PersistenciaCSV {
         }
         for (Linha l : ler(BIBLIOTECA)) {
             try {
-                MaterialBiblioteca m = fabrica.criarMaterialDeCSV(resto(l, 1));
-                raiz.resolverCaminho(l.campos()[0]).adicionarMaterial(m);
+                PastaBiblioteca pasta = raiz.resolverCaminho(l.campos()[0]);
+                MaterialBiblioteca m = fabrica.criarMaterialDeCSV(resto(l, 1), pasta.getCaminhoAtual());
+                pasta.adicionarMaterial(m);
             } catch (ArquivoCorrompidoException e) {
                 avisar(BIBLIOTECA, l, e.getMessage());
             }

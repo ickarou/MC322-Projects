@@ -14,13 +14,13 @@ public class Livro extends MaterialBiblioteca {
 
     @Override
     public String getDescricaoDetalhada() {
-        String s = autor.isEmpty() ? titulo : titulo + ", de " + autor;
+        String s = autor.isEmpty() ? getTitulo() : getTitulo() + ", de " + autor;
         return edicao > 0 ? s + " (" + edicao + "ª ed.)" : s;
     }
 
     @Override
-    public String getTipoMaterial() {
-        return "LIVRO";
+    public TipoMaterial getTipoMaterial() {
+        return TipoMaterial.LIVRO;
     }
 
     public String getAutor() {

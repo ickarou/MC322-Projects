@@ -3,6 +3,7 @@ package br.unicamp.ic.mc322;
 import br.unicamp.ic.mc322.atividades.Atividade;
 import br.unicamp.ic.mc322.biblioteca.PastaBiblioteca;
 import br.unicamp.ic.mc322.exceptions.ArquivoCorrompidoException;
+import br.unicamp.ic.mc322.exceptions.ArquivoPdfInvalidoException;
 import br.unicamp.ic.mc322.exceptions.ConflitoDeHorarioException;
 import br.unicamp.ic.mc322.exceptions.DadoInvalidoException;
 import br.unicamp.ic.mc322.exceptions.FormulaInvalidaException;
@@ -133,13 +134,19 @@ public class EstudaiSistema {
     }
 
     /** F3: remove o semestre, as disciplinas dele e a pasta da biblioteca. Sempre sobra um semestre ativo. */
-    public void removerSemestre(Semestre s) {
+    public void removerSemestre(Semestre s) throws ArquivoPdfInvalidoException {
         if (!semestres.remove(s)) {
             return;
         }
+        // Se algum PDF não puder ser apagado, o semestre é removido mesmo assim e o aviso sai no final.
+        ArquivoPdfInvalidoException aviso = null;
         PastaBiblioteca pasta = bibliotecaRaiz.abrirSubpasta(s.getRotulo());
         if (pasta != null) {
-            bibliotecaRaiz.removerSubpasta(pasta);
+            try {
+                bibliotecaRaiz.removerSubpasta(pasta);
+            } catch (ArquivoPdfInvalidoException e) {
+                aviso = e;
+            }
         }
         if (semestreAtivo == s) {
             semestreAtivo = semestres.isEmpty() ? null : semestres.get(semestres.size() - 1);
@@ -148,6 +155,9 @@ public class EstudaiSistema {
             criarSemestreInicialEmBranco();
         }
         atualizarNotificacoes();
+        if (aviso != null) {
+            throw aviso;
+        }
     }
 
     /** F4 */
@@ -230,13 +240,22 @@ public class EstudaiSistema {
     }
 
     /** F8: remove a disciplina com tudo o que é dela, inclusive os PDFs. */
-    public void removerDisciplina(Semestre s, Disciplina d) {
+    public void removerDisciplina(Semestre s, Disciplina d) throws ArquivoPdfInvalidoException {
         s.removerDisciplina(d);
+        // Se algum PDF não puder ser apagado, a disciplina é removida mesmo assim e o aviso sai no final.
+        ArquivoPdfInvalidoException aviso = null;
         PastaBiblioteca pasta = d.getPastaDisciplina();
         if (pasta != null && pasta.getPastaPai() != null) {
-            pasta.getPastaPai().removerSubpasta(pasta);
+            try {
+                pasta.getPastaPai().removerSubpasta(pasta);
+            } catch (ArquivoPdfInvalidoException e) {
+                aviso = e;
+            }
         }
         atualizarNotificacoes();
+        if (aviso != null) {
+            throw aviso;
+        }
     }
 
     private PastaBiblioteca pastaDa(Semestre s, Disciplina d) {

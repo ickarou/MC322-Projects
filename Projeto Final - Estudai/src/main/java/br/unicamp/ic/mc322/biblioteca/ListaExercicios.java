@@ -14,13 +14,13 @@ public class ListaExercicios extends MaterialBiblioteca {
 
     @Override
     public String getDescricaoDetalhada() {
-        String s = numeroLista > 0 ? "Lista " + numeroLista + " – " + titulo : titulo;
+        String s = numeroLista > 0 ? "Lista " + numeroLista + " – " + getTitulo() : getTitulo();
         return possuiGabarito ? s + " (com gabarito)" : s;
     }
 
     @Override
-    public String getTipoMaterial() {
-        return "LISTA";
+    public TipoMaterial getTipoMaterial() {
+        return TipoMaterial.LISTA;
     }
 
     public int getNumeroLista() {
