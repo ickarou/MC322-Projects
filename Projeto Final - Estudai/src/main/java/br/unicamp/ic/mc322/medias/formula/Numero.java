@@ -11,6 +11,10 @@ public class Numero extends Expressao {
         this.valor = valor;
     }
 
+    public double getValor() {
+        return valor;
+    }
+
     @Override
     public double avaliar(Map<String, Double> valores) {
         return valor;

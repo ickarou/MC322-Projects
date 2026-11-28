@@ -11,16 +11,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 /**
  * Atividade que recebe nota: guarda sigla, peso, nota e o checklist (etapas ou tópicos).
  * O progresso é a fração do checklist concluída. Com nota lançada, a avaliação está encerrada.
  */
 public abstract class AtividadeAvaliativa extends Atividade implements Avaliavel {
-    /** A sigla é usada nas fórmulas: começa com letra e só tem letras, números ou _. */
-    private static final Pattern FORMATO_SIGLA = Pattern.compile("[A-Za-z][A-Za-z0-9_]*");
-
     private final String sigla;
     private double peso;
     private Double nota;
@@ -30,12 +26,34 @@ public abstract class AtividadeAvaliativa extends Atividade implements Avaliavel
                                   double peso)
             throws PrazoInvalidoException, NotaInvalidaException, DadoInvalidoException {
         super(titulo, prazo, prio, d);
-        if (sigla == null || !FORMATO_SIGLA.matcher(sigla.trim()).matches()) {
+        if (sigla == null || !siglaValida(sigla.trim())) {
             throw new DadoInvalidoException("Sigla inválida: use letras e números, começando por letra (ex.: P1, T2).");
         }
         validarPeso(peso);
         this.sigla = sigla.trim().toUpperCase(Locale.ROOT);
         this.peso = peso;
+    }
+
+    /**
+     * A sigla é usada nas fórmulas: começa com letra (sem acento) e o resto só tem letras,
+     * números ou _. Ex.: P1, T2, Lista_3 valem; 1P, P-1, P 1 não.
+     */
+    private static boolean siglaValida(String s) {
+        if (s.isEmpty() || !letraSemAcento(s.charAt(0))) {
+            return false;
+        }
+        for (int i = 1; i < s.length(); i++) {
+            char c = s.charAt(i);
+            boolean permitido = letraSemAcento(c) || (c >= '0' && c <= '9') || c == '_';
+            if (!permitido) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean letraSemAcento(char c) {
+        return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
     }
 
     /** Escrito como !(dentro do intervalo) para que NaN também seja recusado. */

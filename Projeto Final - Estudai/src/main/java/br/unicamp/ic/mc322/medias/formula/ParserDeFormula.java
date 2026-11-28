@@ -12,6 +12,8 @@ import java.util.List;
  *   soma    := produto (('+' | '-') produto)*
  *   produto := fator (('*' | '/') fator)*
  *   fator   := numero | sigla | funcao '(' soma (',' soma)* ')' | '(' soma ')' | '-' fator
+ *
+ * Casas decimais usam ponto (0.4); a vírgula separa os argumentos das funções.
  */
 public class ParserDeFormula {
     private String texto;
@@ -21,14 +23,36 @@ public class ParserDeFormula {
         if (formula == null || formula.isBlank()) {
             throw new FormulaInvalidaException("A fórmula está vazia.");
         }
+        if (temVirgulaDecimal(formula)) {
+            throw new FormulaInvalidaException("Use ponto nas casas decimais (ex.: 0.4 em vez de 0,4). "
+                    + "A vírgula só separa os argumentos das funções; se for isso, ponha um espaço depois dela.");
+        }
         this.texto = formula;
         this.posicao = 0;
         Expressao e = lerSoma();
         pularEspacos();
         if (posicao < texto.length()) {
+            if (atual() == ',') {
+                throw erro("vírgula fora de uma função (para casas decimais, use ponto: 0.4)");
+            }
             throw erro("caractere inesperado '" + texto.charAt(posicao) + "'");
         }
         return e;
+    }
+
+    /**
+     * Procura um dígito, uma vírgula e outro dígito colados, como em "0,4": quase sempre é uma
+     * casa decimal escrita com vírgula. Em "max(P1, 2)" não acusa, porque depois da vírgula vem espaço.
+     */
+    private static boolean temVirgulaDecimal(String s) {
+        for (int i = 1; i < s.length() - 1; i++) {
+            if (s.charAt(i) == ','
+                    && Character.isDigit(s.charAt(i - 1))
+                    && Character.isDigit(s.charAt(i + 1))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Expressao lerSoma() throws FormulaInvalidaException {
@@ -53,7 +77,13 @@ public class ParserDeFormula {
                 return e;
             }
             posicao++;
-            e = new OperacaoBinaria(c, e, lerFator());
+            int inicioDivisor = posicao;
+            Expressao direita = lerFator();
+            if (c == '/' && direita instanceof Numero n && n.getValor() == 0) {
+                posicao = inicioDivisor;
+                throw erro("divisão por zero");
+            }
+            e = new OperacaoBinaria(c, e, direita);
         }
     }
 
