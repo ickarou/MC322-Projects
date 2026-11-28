@@ -3,11 +3,14 @@ package br.unicamp.ic.mc322;
 import br.unicamp.ic.mc322.atividades.Atividade;
 import br.unicamp.ic.mc322.biblioteca.PastaBiblioteca;
 import br.unicamp.ic.mc322.exceptions.ArquivoCorrompidoException;
+import br.unicamp.ic.mc322.exceptions.ConflitoDeHorarioException;
 import br.unicamp.ic.mc322.exceptions.DadoInvalidoException;
+import br.unicamp.ic.mc322.exceptions.FormulaInvalidaException;
 import br.unicamp.ic.mc322.exceptions.PrazoInvalidoException;
 import br.unicamp.ic.mc322.model.Configuracao;
 import br.unicamp.ic.mc322.model.Disciplina;
 import br.unicamp.ic.mc322.model.Semestre;
+import br.unicamp.ic.mc322.model.SituacaoDisciplina;
 import br.unicamp.ic.mc322.model.StatusAtividade;
 import br.unicamp.ic.mc322.notificacoes.Notificacao;
 import br.unicamp.ic.mc322.ordenacao.EstrategiaOrdenacaoAtividade;
@@ -78,7 +81,7 @@ public class EstudaiSistema {
         }
         atualizarNotificacoes();
         if (!persistencia.getAvisos().isEmpty()) {
-            throw new ArquivoCorrompidoException("Algumas linhas dos arquivos de dados foram ignoradas:\n- "
+            throw new ArquivoCorrompidoException("Foram encontrados problemas nos arquivos de dados (o que estava certo foi carregado):\n- "
                     + String.join("\n- ", persistencia.getAvisos()));
         }
     }
@@ -104,13 +107,17 @@ public class EstudaiSistema {
         return s;
     }
 
-    /** F2. Se ano ou número mudarem, as disciplinas passam a usar uma pasta com o novo nome. */
+    /** F2. Se ano ou número mudarem, a pasta do semestre na biblioteca é renomeada junto, com os PDFs. */
     public void editarSemestre(Semestre s, int ano, int num, LocalDate ini, LocalDate fim, LocalDate lim)
             throws PrazoInvalidoException, DadoInvalidoException {
         verificarDuplicado(ano, num, s);
         String rotuloAntigo = s.getRotulo();
         s.editar(ano, num, ini, fim, lim);
         if (!rotuloAntigo.equals(s.getRotulo())) {
+            PastaBiblioteca antiga = bibliotecaRaiz.abrirSubpasta(rotuloAntigo);
+            if (antiga != null) {
+                bibliotecaRaiz.renomearSubpasta(antiga, s.getRotulo());
+            }
             for (Disciplina d : s.getDisciplinas()) {
                 d.setPastaDisciplina(pastaDa(s, d));
             }
@@ -182,6 +189,44 @@ public class EstudaiSistema {
         Disciplina d = s.cadastrarDisciplina(cod, nome, prof, cred);
         d.setPastaDisciplina(pastaDa(s, d));
         return d;
+    }
+
+    /** F7: edita a disciplina. Se o código mudar, a pasta dela na biblioteca é renomeada junto, com os PDFs. */
+    public void editarDisciplina(Disciplina d, String cod, String nome, String prof, int cred)
+            throws DadoInvalidoException {
+        String codigoAntigo = d.getCodigo();
+        d.editarDados(cod, nome, prof, cred);
+        Semestre s = d.getSemestre();
+        if (s != null && !codigoAntigo.equals(d.getCodigo())) {
+            PastaBiblioteca pastaSemestre = bibliotecaRaiz.criarSubpasta(s.getRotulo());
+            PastaBiblioteca antiga = pastaSemestre.abrirSubpasta(codigoAntigo);
+            if (antiga != null) {
+                pastaSemestre.renomearSubpasta(antiga, d.getCodigo());
+            }
+            d.setPastaDisciplina(pastaDa(s, d));
+        }
+        atualizarNotificacoes();
+    }
+
+    /** F9: tranca a disciplina, se ainda estiver no prazo de trancamento do semestre. */
+    public void trancarDisciplina(Disciplina d) throws PrazoInvalidoException {
+        d.trancar(LocalDate.now());
+        atualizarNotificacoes();
+    }
+
+    public void destrancarDisciplina(Disciplina d) throws ConflitoDeHorarioException {
+        d.destrancar();
+        atualizarNotificacoes();
+    }
+
+    /** F28: situação da disciplina usando as médias mínimas configuradas (F41). */
+    public SituacaoDisciplina obterSituacao(Disciplina d) {
+        return d.obterSituacaoAtual(configuracao.getMediaMinimaAprovacao(), configuracao.getMediaMinimaExame());
+    }
+
+    /** Média final da disciplina usando as médias mínimas configuradas (F41). */
+    public double calcularMediaFinal(Disciplina d) throws FormulaInvalidaException {
+        return d.calcularMediaFinal(configuracao.getMediaMinimaAprovacao(), configuracao.getMediaMinimaExame());
     }
 
     /** F8: remove a disciplina com tudo o que é dela, inclusive os PDFs. */
@@ -261,7 +306,8 @@ public class EstudaiSistema {
         Map<String, Notificacao> unicas = new LinkedHashMap<>();
         if (semestreAtivo != null) {
             for (Disciplina d : semestreAtivo.getDisciplinas()) {
-                for (Notificacao n : d.gerarNotificacoes(hoje, agora, configuracao.getDiasAntecedenciaAviso())) {
+                for (Notificacao n : d.gerarNotificacoes(hoje, agora, configuracao.getDiasAntecedenciaAviso(),
+                        configuracao.getMediaMinimaExame())) {
                     if (chavesNotificacoesLidas.contains(n.getChaveUnica())) {
                         n.marcarComoLida();
                     }

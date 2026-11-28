@@ -1,12 +1,14 @@
 package br.unicamp.ic.mc322.medias;
 
 import br.unicamp.ic.mc322.atividades.Avaliavel;
-import br.unicamp.ic.mc322.exceptions.FormulaInvalidaException;
 import br.unicamp.ic.mc322.model.Bonus;
 
 import java.util.List;
 
-/** Σ(nota × peso) ÷ Σ(pesos). O peso de cada avaliação é definido no cadastro (F14). */
+/**
+ * Σ(nota × peso) ÷ Σ(pesos). O peso de cada avaliação é definido no cadastro (F14).
+ * Avaliações com peso 0 não influenciam a média.
+ */
 public class MediaPonderada implements RegraMedia {
 
     public MediaPonderada() {
@@ -18,19 +20,13 @@ public class MediaPonderada implements RegraMedia {
         double soma = 0;
         for (Avaliavel a : avaliacoes) {
             somaPesos += a.getPeso();
-            soma += RegraMedia.notaComBonus(a, bonus) * a.getPeso();
+            soma += CalculoMedia.notaComBonus(a, bonus) * a.getPeso();
         }
         if (somaPesos == 0) {
             // Nenhum peso definido: cai na média aritmética para não dividir por zero.
             return new MediaAritmetica().calcularMedia(avaliacoes, bonus);
         }
-        return RegraMedia.aplicarBonusFinal(soma / somaPesos, bonus);
-    }
-
-    @Override
-    public double calcularNotaNecessaria(List<Avaliavel> avaliacoes, List<Bonus> bonus, double min)
-            throws FormulaInvalidaException {
-        return RegraMedia.buscarNotaNecessaria(this, avaliacoes, bonus, min);
+        return CalculoMedia.aplicarBonusFinal(soma / somaPesos, bonus);
     }
 
     @Override

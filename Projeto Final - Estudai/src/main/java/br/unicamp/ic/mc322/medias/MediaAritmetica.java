@@ -1,7 +1,6 @@
 package br.unicamp.ic.mc322.medias;
 
 import br.unicamp.ic.mc322.atividades.Avaliavel;
-import br.unicamp.ic.mc322.exceptions.FormulaInvalidaException;
 import br.unicamp.ic.mc322.model.Bonus;
 
 import java.util.List;
@@ -15,19 +14,13 @@ public class MediaAritmetica implements RegraMedia {
     @Override
     public double calcularMedia(List<Avaliavel> avaliacoes, List<Bonus> bonus) {
         if (avaliacoes.isEmpty()) {
-            return RegraMedia.aplicarBonusFinal(0, bonus);
+            return CalculoMedia.aplicarBonusFinal(0, bonus);
         }
         double soma = 0;
         for (Avaliavel a : avaliacoes) {
-            soma += RegraMedia.notaComBonus(a, bonus);
+            soma += CalculoMedia.notaComBonus(a, bonus);
         }
-        return RegraMedia.aplicarBonusFinal(soma / avaliacoes.size(), bonus);
-    }
-
-    @Override
-    public double calcularNotaNecessaria(List<Avaliavel> avaliacoes, List<Bonus> bonus, double min)
-            throws FormulaInvalidaException {
-        return RegraMedia.buscarNotaNecessaria(this, avaliacoes, bonus, min);
+        return CalculoMedia.aplicarBonusFinal(soma / avaliacoes.size(), bonus);
     }
 
     @Override

@@ -14,6 +14,7 @@ import br.unicamp.ic.mc322.exceptions.FormulaInvalidaException;
 import br.unicamp.ic.mc322.exceptions.NotaInvalidaException;
 import br.unicamp.ic.mc322.exceptions.PrazoInvalidoException;
 import br.unicamp.ic.mc322.medias.MediaAritmetica;
+import br.unicamp.ic.mc322.medias.MediaPersonalizada;
 import br.unicamp.ic.mc322.medias.NotaSimulada;
 import br.unicamp.ic.mc322.medias.RegraMedia;
 import br.unicamp.ic.mc322.notificacoes.GeradorDeNotificacoes;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -59,7 +61,7 @@ public class Disciplina implements PersistivelCSV, GeradorDeNotificacoes {
 
     public Disciplina(String codigo, String nome, String professor, int creditos) throws DadoInvalidoException {
         validar(codigo, nome, creditos);
-        this.codigo = codigo.trim().toUpperCase();
+        this.codigo = codigo.trim().toUpperCase(Locale.ROOT);
         this.nome = nome.trim();
         this.professor = professor == null ? "" : professor.trim();
         this.creditos = creditos;
@@ -77,10 +79,13 @@ public class Disciplina implements PersistivelCSV, GeradorDeNotificacoes {
         }
     }
 
-    /** F7 */
+    /**
+     * F7. Se a disciplina já tem pasta na biblioteca, use EstudaiSistema.editarDisciplina, que também
+     * renomeia a pasta quando o código muda (senão os PDFs ficam na pasta com o código antigo).
+     */
     public void editarDados(String codigo, String nome, String professor, int creditos) throws DadoInvalidoException {
         validar(codigo, nome, creditos);
-        String novoCodigo = codigo.trim().toUpperCase();
+        String novoCodigo = codigo.trim().toUpperCase(Locale.ROOT);
         if (semestre != null && !novoCodigo.equals(this.codigo)) {
             Disciplina outra = semestre.buscarDisciplina(novoCodigo);
             if (outra != null && outra != this) {
@@ -93,15 +98,31 @@ public class Disciplina implements PersistivelCSV, GeradorDeNotificacoes {
         this.creditos = creditos;
     }
 
-    /** F9: só é possível trancar até a data limite do semestre (se houver). */
-    public void trancar(LocalDate hoje, LocalDate dataLimiteSemestre) throws PrazoInvalidoException {
-        if (dataLimiteSemestre != null && hoje.isAfter(dataLimiteSemestre)) {
-            throw new PrazoInvalidoException("O prazo de trancamento terminou em " + dataLimiteSemestre + ".");
+    /** F9: só é possível trancar até a data limite de trancamento do semestre (se houver). */
+    public void trancar(LocalDate hoje) throws PrazoInvalidoException {
+        LocalDate limite = semestre == null ? null : semestre.getDataLimiteTrancamento();
+        if (limite != null && hoje.isAfter(limite)) {
+            throw new PrazoInvalidoException("O prazo de trancamento terminou em " + limite + ".");
         }
         this.trancada = true;
     }
 
-    public void destrancar() {
+    /**
+     * Enquanto a disciplina estava trancada, os horários dela não contavam nos conflitos, então outra
+     * disciplina pode ter ocupado o mesmo horário. Nesse caso, destrancar é recusado.
+     */
+    public void destrancar() throws ConflitoDeHorarioException {
+        if (!trancada) {
+            return;
+        }
+        if (semestre != null) {
+            for (HorarioAula h : horarios) {
+                if (semestre.verificarConflitoHorario(h, null)) {
+                    throw new ConflitoDeHorarioException("Não dá para destrancar: a aula de " + h
+                            + " colide com outra aula do semestre. Mude um dos horários antes.");
+                }
+            }
+        }
         this.trancada = false;
     }
 
@@ -109,6 +130,9 @@ public class Disciplina implements PersistivelCSV, GeradorDeNotificacoes {
 
     /** F10 */
     public void adicionarHorario(HorarioAula h) throws ConflitoDeHorarioException {
+        if (h.getDisciplina() != null) {
+            throw new IllegalArgumentException("Este horário já pertence a uma disciplina.");
+        }
         verificarConflito(h, null);
         h.setDisciplina(this);
         horarios.add(h);
@@ -227,9 +251,13 @@ public class Disciplina implements PersistivelCSV, GeradorDeNotificacoes {
         return soma;
     }
 
-    /** F16 */
-    public void removerAtividade(String id) throws AtividadeNaoEncontradaException {
+    /** F16. Uma avaliação usada pela fórmula personalizada da média não pode ser removida. */
+    public void removerAtividade(String id) throws AtividadeNaoEncontradaException, FormulaInvalidaException {
         Atividade a = buscarAtividade(id);
+        if (a instanceof AtividadeAvaliativa av && regraMedia instanceof MediaPersonalizada mp && mp.usaSigla(av.getSigla())) {
+            throw new FormulaInvalidaException("A fórmula da média usa " + av.getSigla()
+                    + ". Mude a fórmula antes de remover esta avaliação.");
+        }
         atividades.remove(a);
         bonus.removeIf(b -> b.getAlvo() == a);
         for (Atividade outra : atividades) {
@@ -306,10 +334,18 @@ public class Disciplina implements PersistivelCSV, GeradorDeNotificacoes {
 
     // ------------------------------------------------------------------ notas e médias
 
-    /** F26: bônus numa avaliação desta disciplina, ou na nota final se alvo for null. */
+    /**
+     * F26: bônus numa avaliação desta disciplina, ou na nota final se alvo for null.
+     * A substitutiva não pode ser alvo: a nota dela entra no lugar da prova substituída, então o bônus
+     * deve apontar para a prova substituída.
+     */
     public void adicionarBonus(double valor, Avaliavel alvo) throws NotaInvalidaException {
         if (alvo != null && !atividades.contains(alvo)) {
             throw new NotaInvalidaException("O bônus precisa apontar para uma avaliação desta disciplina.");
+        }
+        if (alvo instanceof Prova p && p.isSubstitutiva()) {
+            throw new NotaInvalidaException("Dê o bônus na prova " + p.getProvaSubstituida().getSigla()
+                    + ": a nota da substitutiva entra no lugar dela.");
         }
         bonus.add(new Bonus(valor, alvo));
     }
@@ -322,8 +358,22 @@ public class Disciplina implements PersistivelCSV, GeradorDeNotificacoes {
         bonus.remove(b);
     }
 
-    /** F27: troca a regra de cálculo da média (Strategy). */
-    public void setRegraMedia(RegraMedia regra) {
+    /**
+     * F27: troca a regra de cálculo da média (Strategy). Uma fórmula personalizada só é aceita se
+     * usar siglas de avaliações que existem nesta disciplina.
+     */
+    public void setRegraMedia(RegraMedia regra) throws FormulaInvalidaException {
+        if (regra instanceof MediaPersonalizada mp) {
+            mp.validarRegra(getSiglasAvaliacoes());
+        }
+        restaurarRegraMedia(regra);
+    }
+
+    /**
+     * Usado pela persistência: põe a regra sem conferir as siglas, porque as atividades ainda
+     * podem não ter sido carregadas. A persistência confere depois e avisa se algo estiver errado.
+     */
+    public void restaurarRegraMedia(RegraMedia regra) {
         if (regra == null) {
             throw new IllegalArgumentException("A regra de média não pode ser nula.");
         }
@@ -332,7 +382,7 @@ public class Disciplina implements PersistivelCSV, GeradorDeNotificacoes {
 
     /** F29 */
     public void lancarNotaExame(double nota) throws NotaInvalidaException {
-        if (nota < 0 || nota > 10) {
+        if (!(nota >= 0 && nota <= 10)) {   // escrito assim para recusar NaN também
             throw new NotaInvalidaException("A nota do exame deve ficar entre 0 e 10.");
         }
         this.notaExame = nota;
@@ -414,13 +464,18 @@ public class Disciplina implements PersistivelCSV, GeradorDeNotificacoes {
         return obterAvaliacoesParaMedia().stream().anyMatch(a -> !a.possuiNotaLancada());
     }
 
-    /** F31: nem tirando 10 em tudo o que falta dá para chegar ao exame. */
+    /** F31: nem tirando 10 em tudo o que falta dá para chegar ao exame (média padrão). */
     public boolean isReprovacaoInevitavel() {
+        return isReprovacaoInevitavel(Configuracao.MEDIA_EXAME_PADRAO);
+    }
+
+    /** F31 com a média mínima de exame configurada. */
+    public boolean isReprovacaoInevitavel(double minExame) {
         if (!possuiAvaliacoesPendentes()) {
             return false;
         }
         try {
-            double necessaria = calcularNotaNecessaria(nextUp(Configuracao.MEDIA_EXAME_PADRAO));
+            double necessaria = calcularNotaNecessaria(nextUp(minExame));
             return necessaria > 10;
         } catch (FormulaInvalidaException e) {
             return false;
@@ -431,7 +486,7 @@ public class Disciplina implements PersistivelCSV, GeradorDeNotificacoes {
         return v + 1e-6;   // "maior que 2,5" vira "pelo menos 2,500001"
     }
 
-    /** F28: situação atual. Devolve null se a fórmula personalizada não puder ser calculada. */
+    /** F28: situação atual, com as médias padrão. O EstudaiSistema usa as médias configuradas. */
     public SituacaoDisciplina obterSituacaoAtual() {
         return obterSituacaoAtual(Configuracao.MEDIA_APROVACAO_PADRAO, Configuracao.MEDIA_EXAME_PADRAO);
     }
@@ -443,33 +498,46 @@ public class Disciplina implements PersistivelCSV, GeradorDeNotificacoes {
         if (obterStatusFaltas() == StatusFaltas.REPROVADO_POR_FALTA) {
             return SituacaoDisciplina.REPROVADO_POR_FALTA;
         }
+        if (obterAvaliacoesParaMedia().isEmpty()) {
+            return SituacaoDisciplina.EM_ANDAMENTO;   // nenhuma avaliação cadastrada ainda
+        }
         double media;
         try {
             media = calcularMediaAtual();
         } catch (FormulaInvalidaException e) {
-            return null;
+            return SituacaoDisciplina.FORMULA_INVALIDA;
         }
         if (media >= minAprovacao) {
             return SituacaoDisciplina.APROVADO;
         }
         if (possuiAvaliacoesPendentes()) {
-            return isReprovacaoInevitavel() ? SituacaoDisciplina.REPROVACAO_INEVITAVEL : SituacaoDisciplina.EM_ANDAMENTO;
+            return isReprovacaoInevitavel(minExame)
+                    ? SituacaoDisciplina.REPROVACAO_INEVITAVEL : SituacaoDisciplina.EM_ANDAMENTO;
         }
         if (media > minExame) {
             if (notaExame == null) {
                 return SituacaoDisciplina.EM_EXAME;
             }
-            double comExame = regraMedia.calcularMediaFinalComExame(media, notaExame);
-            return comExame >= minAprovacao ? SituacaoDisciplina.APROVADO : SituacaoDisciplina.REPROVADO;
+            try {
+                double comExame = regraMedia.calcularMediaFinalComExame(media, notaExame);
+                return comExame >= minAprovacao ? SituacaoDisciplina.APROVADO : SituacaoDisciplina.REPROVADO;
+            } catch (FormulaInvalidaException e) {
+                return SituacaoDisciplina.FORMULA_INVALIDA;
+            }
         }
         return SituacaoDisciplina.REPROVADO;
     }
 
     // ------------------------------------------------------------------ notificações
 
-    /** Gera as notificações da disciplina e das atividades dela. */
+    /** Gera as notificações da disciplina e das atividades dela, com a média de exame padrão. */
     @Override
     public List<Notificacao> gerarNotificacoes(LocalDate hoje, LocalTime agora, int dias) {
+        return gerarNotificacoes(hoje, agora, dias, Configuracao.MEDIA_EXAME_PADRAO);
+    }
+
+    /** Igual ao anterior, usando a média mínima de exame configurada para a sugestão de trancamento. */
+    public List<Notificacao> gerarNotificacoes(LocalDate hoje, LocalTime agora, int dias, double minExame) {
         List<Notificacao> lista = new ArrayList<>();
         if (trancada) {
             return lista;
@@ -494,7 +562,7 @@ public class Disciplina implements PersistivelCSV, GeradorDeNotificacoes {
             lista.add(new NotificacaoProximaAula(codigo, nome, proxima, hoje));
         }
         LocalDate limite = semestre == null ? null : semestre.getDataLimiteTrancamento();
-        boolean emRisco = isReprovacaoInevitavel() || st == StatusFaltas.REPROVADO_POR_FALTA;
+        boolean emRisco = isReprovacaoInevitavel(minExame) || st == StatusFaltas.REPROVADO_POR_FALTA;
         if (emRisco && limite != null && !hoje.isAfter(limite)) {
             lista.add(new NotificacaoSugestaoTrancamento(codigo, nome, limite));
         }

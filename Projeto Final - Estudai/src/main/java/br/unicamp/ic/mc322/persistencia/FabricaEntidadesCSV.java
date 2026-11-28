@@ -104,7 +104,7 @@ public class FabricaEntidadesCSV {
             return switch (c[0]) {
                 case "ARITMETICA" -> new MediaAritmetica();
                 case "PONDERADA" -> new MediaPonderada();
-                // As siglas são conferidas depois, quando as atividades já foram carregadas.
+                // As siglas são conferidas pela PersistenciaCSV depois que as atividades são carregadas.
                 case "PERSONALIZADA" -> new MediaPersonalizada(c[1], c.length > 2 ? c[2] : null, null);
                 default -> throw new ArquivoCorrompidoException("regra de média desconhecida: " + c[0]);
             };

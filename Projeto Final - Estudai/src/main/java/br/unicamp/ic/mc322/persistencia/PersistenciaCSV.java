@@ -8,6 +8,8 @@ import br.unicamp.ic.mc322.biblioteca.MaterialBiblioteca;
 import br.unicamp.ic.mc322.biblioteca.PastaBiblioteca;
 import br.unicamp.ic.mc322.exceptions.ArquivoCorrompidoException;
 import br.unicamp.ic.mc322.exceptions.EstudaiException;
+import br.unicamp.ic.mc322.exceptions.FormulaInvalidaException;
+import br.unicamp.ic.mc322.medias.MediaPersonalizada;
 import br.unicamp.ic.mc322.model.Bonus;
 import br.unicamp.ic.mc322.model.Configuracao;
 import br.unicamp.ic.mc322.model.DiaSemana;
@@ -274,7 +276,7 @@ public class PersistenciaCSV {
             Disciplina d = disciplinaDa(l, disciplinas, REGRAS);
             if (d != null) {
                 try {
-                    d.setRegraMedia(fabrica.criarRegraMediaDeCSV(resto(l, 2)));
+                    d.restaurarRegraMedia(fabrica.criarRegraMediaDeCSV(resto(l, 2)));
                 } catch (ArquivoCorrompidoException e) {
                     avisar(REGRAS, l, e.getMessage());
                 }
@@ -382,6 +384,18 @@ public class PersistenciaCSV {
                 d.adicionarBonus(new Bonus(valor, alvo));
             } catch (EstudaiException | RuntimeException e) {
                 avisar(BONUS, l, "bônus inválido (" + e.getMessage() + ")");
+            }
+        }
+
+        // Com as atividades carregadas, confere se as fórmulas personalizadas usam siglas que existem.
+        // A fórmula é mantida mesmo assim (para o usuário corrigir), mas fica o aviso.
+        for (Disciplina d : disciplinas.values()) {
+            if (d.getRegraMedia() instanceof MediaPersonalizada mp) {
+                try {
+                    mp.validarRegra(d.getSiglasAvaliacoes());
+                } catch (FormulaInvalidaException ex) {
+                    avisos.add(REGRAS + ": fórmula de " + d.getCodigo() + " – " + ex.getMessage());
+                }
             }
         }
 

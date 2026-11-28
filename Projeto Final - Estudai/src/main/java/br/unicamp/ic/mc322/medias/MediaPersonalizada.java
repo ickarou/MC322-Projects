@@ -14,26 +14,43 @@ import java.util.Set;
 
 /**
  * Fórmula livre montada pelo usuário (F27), ex.: (P1 + 2*P2 + max(T1, T2)) / 4.
- * A fórmula de exame é opcional e usa as variáveis MEDIA e EXAME.
+ * A fórmula de exame é opcional, usa as variáveis MEDIA e EXAME e precisa usar EXAME.
+ * Imutável: para mudar a fórmula, crie outra MediaPersonalizada.
  */
-public class MediaPersonalizada implements RegraMedia {
-    private String formula;
-    private Expressao arvore;
-    private String formulaExame;
-    private Expressao arvoreExame;
+public final class MediaPersonalizada implements RegraMedia {
+    private static final String VAR_MEDIA = "MEDIA";
+    private static final String VAR_EXAME = "EXAME";
 
+    private final String formula;
+    private final Expressao arvore;
+    private final String formulaExame;
+    private final Expressao arvoreExame;
+
+    /**
+     * Interpreta as fórmulas. Se "siglas" não for null, confere também se a fórmula só usa siglas
+     * que existem (a Disciplina confere de novo em setRegraMedia).
+     */
     public MediaPersonalizada(String formula, String formulaExame, Set<String> siglas) throws FormulaInvalidaException {
         ParserDeFormula parser = new ParserDeFormula();
         this.arvore = parser.interpretar(formula);
         this.formula = formula.trim();
+        if (arvore.getVariaveis().isEmpty()) {
+            throw new FormulaInvalidaException("A fórmula precisa usar pelo menos uma avaliação (ex.: P1).");
+        }
         if (formulaExame != null && !formulaExame.isBlank()) {
             this.arvoreExame = parser.interpretar(formulaExame);
             this.formulaExame = formulaExame.trim();
             for (String v : arvoreExame.getVariaveis()) {
-                if (!v.equals("MEDIA") && !v.equals("EXAME")) {
+                if (!v.equals(VAR_MEDIA) && !v.equals(VAR_EXAME)) {
                     throw new FormulaInvalidaException("A fórmula de exame só pode usar MEDIA e EXAME (achei " + v + ").");
                 }
             }
+            if (!arvoreExame.getVariaveis().contains(VAR_EXAME)) {
+                throw new FormulaInvalidaException("A fórmula de exame precisa usar a nota do EXAME.");
+            }
+        } else {
+            this.arvoreExame = null;
+            this.formulaExame = null;
         }
         if (siglas != null) {
             validarRegra(siglas);
@@ -50,32 +67,28 @@ public class MediaPersonalizada implements RegraMedia {
         }
     }
 
+    /** A fórmula usa esta sigla? (usado para não deixar remover uma avaliação que a fórmula usa) */
+    public boolean usaSigla(String sigla) {
+        return sigla != null && arvore.getVariaveis().contains(sigla.toUpperCase(Locale.ROOT));
+    }
+
     @Override
     public double calcularMedia(List<Avaliavel> avaliacoes, List<Bonus> bonus) throws FormulaInvalidaException {
         Map<String, Double> valores = new HashMap<>();
         for (Avaliavel a : avaliacoes) {
-            valores.put(a.getSigla().toUpperCase(Locale.ROOT), RegraMedia.notaComBonus(a, bonus));
+            valores.put(a.getSigla().toUpperCase(Locale.ROOT), CalculoMedia.notaComBonus(a, bonus));
         }
-        double media = RegraMedia.limitar(arvore.avaliar(valores));
-        return RegraMedia.aplicarBonusFinal(media, bonus);
+        double media = CalculoMedia.limitar(arvore.avaliar(valores));
+        return CalculoMedia.aplicarBonusFinal(media, bonus);
     }
 
+    /** Sem fórmula de exame, usa a regra padrão. Com fórmula, um erro de cálculo é avisado em vez de ignorado. */
     @Override
-    public double calcularMediaFinalComExame(double media, double exame) {
+    public double calcularMediaFinalComExame(double media, double exame) throws FormulaInvalidaException {
         if (arvoreExame == null) {
             return RegraMedia.super.calcularMediaFinalComExame(media, exame);
         }
-        try {
-            return RegraMedia.limitar(arvoreExame.avaliar(Map.of("MEDIA", media, "EXAME", exame)));
-        } catch (FormulaInvalidaException e) {
-            return RegraMedia.super.calcularMediaFinalComExame(media, exame);
-        }
-    }
-
-    @Override
-    public double calcularNotaNecessaria(List<Avaliavel> avaliacoes, List<Bonus> bonus, double min)
-            throws FormulaInvalidaException {
-        return RegraMedia.buscarNotaNecessaria(this, avaliacoes, bonus, min);
+        return CalculoMedia.limitar(arvoreExame.avaliar(Map.of(VAR_MEDIA, media, VAR_EXAME, exame)));
     }
 
     public String getFormula() {
